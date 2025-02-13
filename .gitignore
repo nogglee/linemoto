@@ -1,0 +1,20 @@
+# Node modules (백엔드 & 프론트엔드)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+pnpm-lock.yaml
+
+# 환경변수 파일 (보안)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 빌드된 파일들 (프론트엔드 & 백엔드)
+dist/
+build/
+.next/
+.vercel/
