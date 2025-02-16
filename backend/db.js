@@ -10,6 +10,9 @@ const pool = new Pool({
   max: 10,  // 최대 연결 수
   idleTimeoutMillis: 30000, // 30초 동안 연결이 없으면 해제
   connectionTimeoutMillis: 2000, // 2초 동안 연결 시도
+  ssl: {
+    rejectUnauthorized: false // 🔥 Supabase는 SSL 연결 필요
+  }
 });
 
 pool.connect()
