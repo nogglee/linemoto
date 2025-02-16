@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const pool = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 5000; 
@@ -10,12 +11,19 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({ message: "Backend is running!" });
+// DB에서 데이터 조회
+app.get('/users', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM users");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ DB 조회 오류:", err);
+    res.status(500).send("Server Error");
+  }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
 });
 
 app.post("/data", (req, res) => {
