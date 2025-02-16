@@ -4,12 +4,16 @@ import axios from "axios";
 function App() {
   const [data, setData] = useState(null);
   const [name, setName] = useState("");
+  const API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5001"  // 🔥 로컬 환경
+    : "https://dodogo.vercel.app"; // 🔥 배포된 Vercel 환경
 
-  useEffect(() => {
-    axios.get("http://localhost:5001/")
-      .then(response => setData(response.data))
-      .catch(error => console.error("API 호출 오류:", error));
-  }, []);
+useEffect(() => {
+  axios.get(`${API_BASE_URL}/users`)
+    .then(response => setData(response.data))
+    .catch(error => console.error("API 호출 오류:", error));
+}, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
