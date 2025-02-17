@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { login } from "../api/api";
 
 const Login = ({ setUser }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -10,11 +10,7 @@ const Login = ({ setUser }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5001/login", {
-        phone_number: phoneNumber,
-        password: password,
-      });
-
+      const response = await login(phoneNumber, password);
       const userData = response.data;
       localStorage.setItem("user", JSON.stringify(userData)); // ✅ 로컬 스토리지에 저장
       setUser(userData);

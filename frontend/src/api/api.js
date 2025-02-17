@@ -5,11 +5,6 @@ const API_BASE_URL =
     ? "https://dodogo.vercel.app" // Vercel 배포된 백엔드 주소
     : "http://localhost:5001"; // 로컬 개발 주소
 
-// 🔹 상품 조회 API (POS에서 상품 리스트 가져올 때)
-// export const getProducts = async () => {
-//   return axios.get(`${API_BASE_URL}/products`);
-// };
-
 export const getProducts = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/products`); // 이 URL 확인!
@@ -44,4 +39,11 @@ export const addProduct = async (shopId, name, price, stock, category) => {
     console.error("❌ 상품 추가 실패:", error);
     return null;
   }
+};
+
+export const login = async (phoneNumber, password) => {
+  return axios.post(`${API_BASE_URL}/login`, {
+    phone_number: phoneNumber,
+    password: password,
+  });
 };
