@@ -1,49 +1,40 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import Login from "./components/Login";
+import CustomerDashboard from "./components/CustomerDashboard";
+import Layout from "./components/Layout";
+import POS from "./components/POS";
+import ProductManagement from "./components/ProductManagement";
+import SalesManagement from "./components/SalesManagement";
+import CustomerManagement from "./components/CustomerManagement";
 
 function App() {
-  const [data, setData] = useState(null);
-  const [name, setName] = useState("");
-  const API_BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:5001"  // 🔥 로컬 환경
-    : "https://dodogo.vercel.app"; // 🔥 배포된 Vercel 환경
+  const [user, setUser] = useState(null);
 
-useEffect(() => {
-  axios.get(`${API_BASE_URL}/users`)
-    .then(response => setData(response.data))
-    .catch(error => console.error("API 호출 오류:", error));
-}, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name) return alert("이름을 입력하세요!");
-
-    try {
-      const response = await axios.post("http://localhost:5001/data", { name });
-      alert(response.data.message);
-      setName(""); // 입력 필드 초기화
-    } catch (error) {
-      console.error("데이터 저장 오류:", error);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-  };
+  }, []);
 
   return (
-    <div>
-      <h1>백엔드 연결 테스트</h1>
-      {data ? <p>{data.message}</p> : <p>로딩 중...</p>}
+    <Router>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to={`/${user.role}`} /> : <Login setUser={setUser} />} />
+        
+        {/* ✅ Layout 안에서 Outlet 사용 → 자동으로 POS가 기본 화면으로 */}
+        <Route path="/admin" element={<Layout user={user} setUser={setUser} />}>
+          <Route index element={<Navigate to="/admin/pos" replace />} /> {/* ✅ 기본값 POS */}
+          <Route path="pos" element={<POS />} />
+          <Route path="products" element={<ProductManagement />} />
+          {/* <Route path="sales" element={<SalesManagement />} />
+          <Route path="customers" element={<CustomerManagement />} /> */}
+        </Route>
 
-      <h2>데이터 저장 테스트</h2>
-      <form onSubmit={handleSubmit}>
-        <input 
-          type="text" 
-          value={name} 
-          onChange={(e) => setName(e.target.value)} 
-          placeholder="이름 입력"
-        />
-        <button type="submit">저장</button>
-      </form>
-    </div>
+        <Route path="/customer" element={user?.role === "customer" ? <CustomerDashboard /> : <Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 
