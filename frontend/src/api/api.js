@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "dodo-lyart.vercel.app" // Vercel 배포된 백엔드 주소
+    ? "https://dodo-lyart.vercel.app" // Vercel 배포된 백엔드 주소
     : "http://localhost:5001"; // 로컬 개발 주소
 
 export const getProducts = async () => {
