@@ -7,14 +7,24 @@ const pool = require("./db");
 const app = express();
 const PORT = process.env.PORT || 5000; 
 
-// CORS 설정 (프론트엔드 연결 허용)
+const allowedOrigins = [
+  "http://localhost:3000",  // 로컬 개발 환경
+  "https://dodogo.vercel.app"  // Vercel 배포 환경
+];
+
 app.use(cors({
-  origin: ["https://dodogo.vercel.app"],  // ✅ 프론트엔드 주소를 허용
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],  // ✅ 허용할 HTTP 메서드 추가
-  allowedHeaders: ["Content-Type", "Authorization"]  // ✅ 추가적으로 필요한 헤더 지정
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);  // 허용된 origin이면 요청 허용
+    } else {
+      callback(new Error("CORS 정책에 의해 차단된 요청"), false);
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],  // ✅ 허용할 HTTP 메서드 추가
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true  // ✅ 쿠키 및 인증 헤더를 포함할 경우 필요
 }));
 app.use(express.json());
-app.options("*", cors()); // 모든 OPTIONS 요청에 대해 CORS 허용
 
 // 로그인 시, role 반환, 프론트에서 화면 분기
 app.post("/login", async (req, res) => {
