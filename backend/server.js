@@ -14,6 +14,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]  // ✅ 추가적으로 필요한 헤더 지정
 }));
 app.use(express.json());
+app.options("*", cors()); // 모든 OPTIONS 요청에 대해 CORS 허용
 
 // 로그인 시, role 반환, 프론트에서 화면 분기
 app.post("/login", async (req, res) => {
