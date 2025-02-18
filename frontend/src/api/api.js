@@ -1,7 +1,8 @@
 import axios from "axios";
+
 const API_BASE_URL =
 process.env.NODE_ENV === "production"
-? "https://dodogo.vercel.app" // Vercel 배포된 백엔드 주소
+? "https://dodo-lyart.vercel.app" // Vercel 배포된 백엔드 주소
 : "http://localhost:5001"; // 로컬 개발 주소COSR
 
 export const getProducts = async () => {
@@ -41,9 +42,6 @@ export const addProduct = async (shopId, name, price, stock, category) => {
 };
 
 export const login = async (phoneNumber, password) => {
-  console.log("📢 [API 호출] login 함수 실행됨");
-  console.log("📌 요청 데이터:", { phoneNumber, password });
-
   return axios.post(`${API_BASE_URL}/login`, {
     phone_number: phoneNumber,
     password: password,
