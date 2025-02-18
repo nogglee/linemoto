@@ -9,9 +9,9 @@ const PORT = process.env.PORT || 5000;
 
 // CORS 설정 (프론트엔드 연결 허용)
 app.use(cors({
-  origin: "*",  // 🔥 모든 도메인에서 API 호출 가능하게 설정
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type"]
+  origin: ["https://dodogo.vercel.app"],  // ✅ 프론트엔드 주소를 허용
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],  // ✅ 허용할 HTTP 메서드 추가
+  allowedHeaders: ["Content-Type", "Authorization"]  // ✅ 추가적으로 필요한 헤더 지정
 }));
 app.use(express.json());
 
