@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 // CORS 설정 (프론트엔드 연결 허용)
 app.use(cors({
   origin: "*",  // 🔥 모든 도메인에서 API 호출 가능하게 설정
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type"]
 }));
 app.use(express.json());
