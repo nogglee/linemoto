@@ -9,7 +9,7 @@ const Layout = ({ user, setUser }) => {
       <Sidebar user={user} setUser={setUser} />
 
       {/* 동적으로 바뀌는 메인 영역 */}
-      <main style={{ flexGrow: 1, padding: "20px", overflowY: "auto", marginLeft: "300px" }}>
+      <main style={{ flexGrow: 1, padding: "40px", overflowY: "auto"}}>
         <Outlet />  {/* 여기서 현재 선택된 컴포넌트가 렌더링됨 */}
       </main>
     </div>
