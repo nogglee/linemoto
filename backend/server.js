@@ -205,6 +205,21 @@ app.put("/products/:id", async (req, res) => {
   }
 });
 
+// 상품 삭제 API
+app.delete("/products", async (req, res) => {
+  const { ids } = req.body; // 삭제할 상품 ID 배열
+  try {
+    const result = await pool.query("DELETE FROM shops.products WHERE id = ANY($1)", [ids]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "삭제할 상품을 찾을 수 없습니다." });
+    }
+    res.status(200).json({ message: "상품 삭제 완료" });
+  } catch (error) {
+    console.error("상품 삭제 오류:", error); // 오류 로그 출력
+    res.status(500).json({ error: "서버 오류" });
+  }
+});
+
 // 결제 처리
 app.post("/transactions", async (req, res) => {
   const { member_id, admin_id, total_amount, discount, final_amount, payment_method, items } = req.body;
