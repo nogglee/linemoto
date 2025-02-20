@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/api";
+import { login } from "../api/auth";
 
 const Login = ({ setUser }) => {
   const [phoneNumber, setPhoneNumber] = useState("");

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import './App.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Login from "./components/Login";
 import CustomerDashboard from "./components/CustomerDashboard";
 import Layout from "./components/Layout";
@@ -35,6 +37,7 @@ function App() {
 
         <Route path="/customer" element={user?.role === "customer" ? <CustomerDashboard /> : <Navigate to="/" />} />
       </Routes>
+      <ToastContainer />
     </Router>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getProducts, submitTransaction, getMemberInfo, updateMemberPoints } from "../api/api";
+import { getProducts } from "../api/products";
+import { submitTransaction } from "../api/transactions";
+import { getMemberInfo, updateMemberPoints } from "../api/members";
 
 const POS = () => {
   const [products, setProducts] = useState([]);
