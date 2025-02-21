@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:3000",  // 로컬 개발 환경
-  "https://linemoto.vercel.app"  // Vercel 배포 환경
+  "https://linemoto.co.kr"  // Vercel 배포 환경
 ];
 
 app.use(cors({
