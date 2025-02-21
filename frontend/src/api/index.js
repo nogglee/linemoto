@@ -3,7 +3,7 @@ import supabase from "./supabase";
 
 const API_BASE_URL =
 process.env.NODE_ENV === "production"
-? "https://api.linemoto.com"
+? "https://api.linemoto.co.kr"
 : "http://localhost:5001"; 
 
 const apiClient = axios.create({
