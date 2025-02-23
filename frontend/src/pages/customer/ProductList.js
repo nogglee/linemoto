@@ -33,7 +33,7 @@ const ProductList = () => {
         />
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] md:grid-cols-4 lg:grid-cols-8 gap-4 w-full mt-4 mb-10">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] md:grid-cols-4 lg:grid-cols-8 gap-4 w-full mt-4 mb-10">
         {filteredProducts.map((product) => (
           <div key={product.id} className="w-full">
             <img src={product.image_url} alt={product.name} className="w-full h-auto aspect-square shadow-sm rounded-lg object-cover" />
