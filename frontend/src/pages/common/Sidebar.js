@@ -1,14 +1,14 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { ReactComponent as PosIcon } from '../assets/icons/ico-pos.svg';
-import { ReactComponent as ProductIcon } from '../assets/icons/ico-product.svg';
-import { ReactComponent as CustomerIcon } from '../assets/icons/ico-customer.svg';
-import { ReactComponent as ReportIcon } from '../assets/icons/ico-report.svg'
-import { ReactComponent as PosIconActive } from '../assets/icons/ico-pos-active.svg';
-import { ReactComponent as ProductIconActive } from '../assets/icons/ico-product-active.svg';
-import { ReactComponent as CustomerIconActive } from '../assets/icons/ico-customer-active.svg';
-import { ReactComponent as ReportIconActive } from '../assets/icons/ico-report-active.svg';
-import { ReactComponent as LogoutIcon } from '../assets/icons/ico-logout.svg'
+import { ReactComponent as PosIcon } from '../../assets/icons/ico-pos.svg';
+import { ReactComponent as ProductIcon } from '../../assets/icons/ico-product.svg';
+import { ReactComponent as CustomerIcon } from '../../assets/icons/ico-customer.svg';
+import { ReactComponent as ReportIcon } from '../../assets/icons/ico-report.svg';
+import { ReactComponent as PosIconActive } from '../../assets/icons/ico-pos-active.svg';
+import { ReactComponent as ProductIconActive } from '../../assets/icons/ico-product-active.svg';
+import { ReactComponent as CustomerIconActive } from '../../assets/icons/ico-customer-active.svg';
+import { ReactComponent as ReportIconActive } from '../../assets/icons/ico-report-active.svg';
+import { ReactComponent as LogoutIcon } from '../../assets/icons/ico-logout.svg';
 
 
 function Sidebar({ user, setUser }) {
@@ -17,17 +17,17 @@ function Sidebar({ user, setUser }) {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   return (
-    <div className="bg-gray-100 py-10 px-5 font-body flex flex-col gap-5">
+    <div className="bg-gray-100 py-10 px-5 font-body flex flex-col gap-5 ">
       <div className="py-3 px-2.5 flex justify-between">
         <p className="font-700 text-xl pt-[2px]">라인모토</p>
         <button className="logout-btn" onClick={handleLogout}><LogoutIcon /></button>
       </div>
       <nav className="sidebar-menu">
-        <NavLink to="/admin/pos" className={({ isActive }) => isActive ? "active nav-item" : "nav-item"}>
+        <NavLink to="/admin/pos" end className={({ isActive }) => isActive ? "active nav-item" : "nav-item"}>
           {({ isActive }) => (
             <>
               {isActive ? <PosIconActive width="22" height="22" /> : <PosIcon width="22" height="22" />}

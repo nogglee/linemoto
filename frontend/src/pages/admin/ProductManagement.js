@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getProducts, addProduct, updateProduct, deleteProducts } from "../api/products";
-import CategorySelector from "./CategorySelect";
-import { ReactComponent as SearchIcon} from "../assets/icons/ico-search.svg";
-import { ReactComponent as ProductAddIcon} from "../assets/icons/ico-product-add.svg";
+import { getProducts, addProduct, updateProduct, deleteProducts } from "../../api/products";
+import CategorySelector from "./components/CategorySelect";
+import { ReactComponent as SearchIcon } from "../../assets/icons/ico-search.svg";
+import { ReactComponent as ProductAddIcon } from "../../assets/icons/ico-product-add.svg";
 import { getChoseong } from 'es-hangul';
-import DeleteProductModal from './DeleteProductModal';
-import AddProductModal from './AddProductModal';
+import DeleteProductModal from "./components/DeleteProductModal";
+import AddProductModal from "./components/AddProductModal";
 
 // 상품이미지가 NULL 이거나 EMPTY 상태일 때 적용하는 Default 이미지
 const getDefaultImageUrl = () => {
@@ -152,35 +152,37 @@ const ProductManagement = () => {
           className="ml-2 border-none bg-transparent mt-0.5 rounded focus:outline-none text-gray-950"
         />
       </div>
-      <table className="mt-4 w-full border">
-        <thead>
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                onChange={handleSelectAll} // 전체 선택 핸들러
-                checked={selectedProducts.length === products.length && products.length > 0} // 전체 선택 상태
-              />
+      <table className="mt-4 w-full">
+        <thead className="text-sm text-gray-400">
+          <tr className=" h-[50px]">
+            <th className="px-4">
+              <div className="flex">
+                <input
+                  type="checkbox"
+                  onChange={handleSelectAll} // 전체 선택 핸들러
+                  checked={selectedProducts.length === products.length && products.length > 0} // 전체 선택 상태
+                />
+              </div>
             </th>
-            <th>상품 이미지</th>
-            <th>상품명</th>
-            <th>가격</th>
+            <th></th>
+            <th className="font-400 px-4 text-start">상품명</th>
+            <th className="font-400 px-4 text-start">가격</th>
             <th>카테고리</th>
             <th>수량</th>
           </tr>
         </thead>
         <tbody>
           {filteredProducts.map((product) => (
-            <tr key={product.id}>
-              <td>
+            <tr key={product.id}  className="">
+              <td className="p-4 flex ">
                 <input
                   type="checkbox"
                   checked={selectedProducts.includes(product.id)} // 개별 선택 상태
                   onChange={() => handleSelectProduct(product.id)} // 개별 선택 핸들러
                 />
               </td>
-              <td>
-                <div className="w-10 h-10 overflow-hidden rounded-md">
+              <td className="px-4">
+                <div className="w-8 h-8 overflow-hidden rounded-md">
                   <img
                     src={product.imageUrl ? product.imageUrl : getDefaultImageUrl()}
                     alt={product.name}
@@ -189,7 +191,7 @@ const ProductManagement = () => {
                   />
                 </div>
               </td>
-              <td>
+              <td className="px-4">
                 <input
                   type="text"
                   value={product.name}

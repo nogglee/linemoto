@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CategorySelector from './CategorySelect';
 import { toast } from 'react-toastify';
-import { uploadImage } from '../api/products';
+import { uploadImage } from '../../../api/products';
 
 const getDefaultImageUrl = () => {
   return `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/product-images/default.png`;
