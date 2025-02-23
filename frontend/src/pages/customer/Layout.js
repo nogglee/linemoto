@@ -8,7 +8,7 @@ const CustomerLayout = ({ user }) => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden ">
       <Header /> {/* ✅ 일반 사용자용 헤더 */}
       <div className="flex-1 p-6">
         <Outlet /> {/* ✅ 사용자 하위 페이지 렌더링 */}

@@ -149,7 +149,7 @@ const ProductManagement = () => {
           placeholder="상품명으로 검색해 보세요"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="ml-2 border-none bg-transparent mt-0.5 rounded focus:outline-none text-gray-950"
+          className="ml-2 border-none bg-transparent mt-0.5 rounded focus:outline-none text-gray-950 w-full"
         />
       </div>
       <table className="mt-4 w-full">

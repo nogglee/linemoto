@@ -1,48 +1,3 @@
-// import React, { useState } from "react";
-// import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-// import './App.css';
-// import { ToastContainer } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-
-// import Login from "./pages/customer/Login";
-// import AdminLayout from "./pages/admin/AdminLayout";
-// import CustomerLayout from "./pages/customer/Layout";
-// import ProductList from "./pages/customer/ProductList";
-// import Header from "./pages/common/Header";
-// import POS from "./pages/admin/POS";
-// import ProductManagement from "./pages/admin/ProductManagement";
-
-// function App() {
-//   const [user, setUser] = useState(() => {
-//     const storedUser = localStorage.getItem("user");
-//     return storedUser ? JSON.parse(storedUser) : null;
-//   });
-
-//   return (
-//     <Router>
-//       {/* ✅ Admin은 Header 숨김 */}
-//       {user?.role !== "admin" && <Header user={user} setUser={setUser} />}
-//       <Routes>
-//         <Route path="/" element={!user ? <ProductList /> : <Navigate to={`/${user.role}`} />} />
-//         <Route path="/login" element={<Login setUser={setUser} />} />
-
-//         {/* ✅ 관리자 레이아웃 (POS 기본 페이지) */}
-//         <Route path="/admin/*" element={user?.role === "admin" ? <AdminLayout user={user} setUser={setUser} /> : <Navigate to="/" />}>
-//           <Route index element={<Navigate to="/admin/pos" replace />} />  {/* ✅ 기본값 POS */}
-//           <Route path="pos" element={<POS />} />
-//           <Route path="products" element={<ProductManagement />} />
-//         </Route>
-
-//         {/* ✅ 고객 레이아웃 */}
-//         <Route path="/customer/*" element={user?.role === "customer" ? <CustomerLayout user={user} /> : <Navigate to="/" />} />
-//       </Routes>
-//       <ToastContainer />
-//     </Router>
-//   );
-// }
-
-// export default App;
-
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import './App.css';
@@ -50,7 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Login from "./pages/customer/Login";
-import AdminLayout from "./pages/admin/AdminLayout";
+import AdminLayout from "./pages/admin/Layout";
 import CustomerLayout from "./pages/customer/Layout";
 import ProductList from "./pages/customer/ProductList";
 import Header from "./pages/common/Header";
