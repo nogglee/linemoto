@@ -79,3 +79,62 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:hover {
   border-color: #2D3139;
 }
+/* 카드 3D 회전 효과 */
+.product-card {
+  width: 140px;
+  height: 140px;
+  perspective: 1000px;
+  /* 3D 효과 */
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.product-card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* 기존 스타일 반영 */
+  align-items: start;
+  /* 기존 스타일 반영 */
+  
+  /* 기존 p-4 유지 */
+  box-shadow: var(--tw-shadow);
+  /* Tailwind shadow 유지 */
+}
+
+/* ✅ 정사각형 유지 (기본 w-[140px], md:w-[160px], lg:w-[200px]) */
+.card-front {
+  background: white;
+  z-index: 2;
+  aspect-ratio: 1 / 1;
+  /* 정사각형 비율 유지 */
+}
+
+/* 뒷면 (상품 이미지) */
+.card-back {
+  transform: rotateY(180deg);
+  background: #f3f3f3;
+}
+
+.card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}

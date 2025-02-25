@@ -8,8 +8,8 @@ const POS = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [usedPoints, setUsedPoints] = useState(0);
-  const [categories, setCategories] = useState(["전체"]);
-  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [categories, setCategories] = useState(["기타"]);
+  const [selectedCategory, setSelectedCategory] = useState("기타");
 
   // ✅ 상품 목록 불러오기 및 카테고리 세팅
   useEffect(() => {
@@ -18,7 +18,7 @@ const POS = () => {
       setProducts(data);
       
       // ✅ 카테고리 목록 추출 후 중복 제거
-      const uniqueCategories = ["전체", ...new Set(data.map((product) => product.category))];
+      const uniqueCategories = ["기타", ...new Set(data.map((product) => product.category))];
       setCategories(uniqueCategories);
     };
     fetchProducts();
@@ -97,7 +97,7 @@ const POS = () => {
           {categories.map((category) => (
             <button
               key={category}
-              className={`py-3 px-6 text-gray-500 hover:text-gray-950 font-medium ${
+              className={`py-3 px-6 text-gray-500 hover:text-gray-950 font-medium whitespace-nowrap ${
                 selectedCategory === category ? "border-b-2 border-black text-gray-950 font-bold" : ""
               }`}
               onClick={() => setSelectedCategory(category)}
@@ -113,7 +113,9 @@ const POS = () => {
           gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))" 
         }}>
           {products
-            .filter((product) => selectedCategory === "전체" || product.category === selectedCategory)
+            .filter((product) => selectedCategory === "기타" 
+            ? product.category === "기타"
+            : product.category === selectedCategory)
             .map((product) => (
               <button
                 key={product.id}
