@@ -10,13 +10,18 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
+  seEffect(() => {
+    // 현재 페이지의 히스토리를 추가 (뒤로가기 시 기본 동작 방지)
+    window.history.pushState(null, "", window.location.href);
+
     const handleBackButton = (event) => {
       event.preventDefault();
-      if (window.history.length > 1) {
-        navigate(-1); // 바로 이전 페이지로 이동
+
+      // 뒤로 갈 히스토리가 있으면 navigate(-1), 없으면 특정 경로로 이동
+      if (window.history.length > 2) {
+        navigate(-1);
       } else {
-        navigate("/"); // 뒤로 갈 곳이 없으면 홈으로 이동
+        navigate("/"); // 홈으로 이동
       }
     };
 
@@ -77,12 +82,12 @@ const ProductList = () => {
         <>
           {/* 🔹 카테고리 선택 후: 검색창 & 상품 목록 */}
           <div className="flex items-center justify-between mb-4">
-            <button
+            {/* <button
               onClick={() => setSelectedCategory(null)}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
             >
               ← 카테고리 선택으로 돌아가기
-            </button>
+            </button> */}
             <div className="bg-gray-100 rounded-[10px] px-5 py-2.5 gap-3 flex text-gray-400 text-base items-center">
               <SearchIcon />
               <input
