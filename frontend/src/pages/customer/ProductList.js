@@ -26,7 +26,7 @@ const ProductList = () => {
 
   const getCategoryImage = (category) => {
     const formattedCategory = encodeURIComponent(category); // URL 인코딩 처리
-    return `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/category-images/${formattedCategory}.jpeg`;
+    return `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/category-images/${formattedCategory}.png`;
   };
 
   const filteredProducts = products
