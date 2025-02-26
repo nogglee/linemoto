@@ -33,23 +33,25 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="container mx-auto mt-20">
-      <h1 className="text-2xl font-bold">로그인</h1>
-      <input
-        type="text"
-        placeholder="전화번호"
-        className="w-full p-2 border rounded mb-4"
-        value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="비밀번호"
-        className="w-full p-2 border rounded mb-4"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin} className="px-4 py-2 bg-blue-500 text-white rounded">로그인</button>
+    <div className="flex w-full mt-4 px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
+      <div className="mt-20 px-[300px]">
+        <h1 className="text-4xl font-semibold text-center mb-10">로그인</h1>
+        <input
+          type="text"
+          placeholder="전화번호"
+          className="w-full px-3 py-2 border rounded mb-4"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="비밀번호"
+          className="w-full p-2 border rounded mb-4"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin} className="w-full px-4 py-3 bg-blue-500 text-white rounded">로그인</button>
+      </div>
     </div>
   );
 };
