@@ -34,23 +34,23 @@ const ProductList = () => {
     .filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="container mx-auto mt-8 px-4">
+    <div className="container mx-auto mt-4 px-4">
       {/* 🔹 초기 화면: 카테고리 선택 */}
       {!selectedCategory ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map((category) => (
             <button
               key={category}
-              className="border p-4 rounded-xl shadow flex flex-col items-center w-full aspect-square bg-white"
+              className="border p-4 rounded-xl shadow flex flex-col items-start justify-between w-full aspect-square bg-white"
               onClick={() => handleCategorySelect(category)}
             >
+              <h3 className="text-lg font-700">{category}</h3>
               <img
                 src={getCategoryImage(category)}
                 onError={(e) => (e.target.src = "/default-category.png")} // 이미지 없을 경우 기본 이미지 표시
                 alt={category}
-                className="w-20 h-20 object-contain"
+                className="w-full object-contain"
               />
-              <h3 className="text-lg font-semibold mt-2">{category}</h3>
             </button>
           ))}
         </div>
