@@ -10,7 +10,7 @@ const ProductList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  seEffect(() => {
+  useEffect(() => {
     // 현재 페이지의 히스토리를 추가 (뒤로가기 시 기본 동작 방지)
     window.history.pushState(null, "", window.location.href);
 
