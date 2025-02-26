@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { getProducts, addProduct, updateProduct, deleteProducts } from "../../api/products";
 import CategorySelector from "./components/CategorySelect";
-import { ReactComponent as SearchIcon } from "../../assets/icons/ico-search.svg";
 import { ReactComponent as ProductAddIcon } from "../../assets/icons/ico-product-add.svg";
 import { getChoseong } from 'es-hangul';
 import DeleteProductModal from "./components/DeleteProductModal";
 import AddProductModal from "./components/AddProductModal";
+import SearchBar from "../common/components/SearchBar";
 
 // 상품이미지가 NULL 이거나 EMPTY 상태일 때 적용하는 Default 이미지
 const getDefaultImageUrl = () => {
@@ -142,16 +142,11 @@ const ProductManagement = () => {
           </button>
         </div>
       </div>
-      <div className="bg-gray-100 rounded-[10px] px-5 py-2.5 gap-3 flex text-gray-400 text-base items-center">
-        <SearchIcon />
-        <input
-          type="text"
-          placeholder="상품명으로 검색해 보세요"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="ml-2 border-none bg-transparent mt-0.5 rounded focus:outline-none text-gray-950 w-full"
-        />
-      </div>
+      <SearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        placeholder="상품명으로 검색해 보세요"
+      />
       <table className="mt-4 w-full">
         <thead className="text-sm text-gray-400">
           <tr className=" h-[50px]">
