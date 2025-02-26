@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getProducts } from "../../api/products";
 import { ReactComponent as SearchIcon } from "../../assets/icons/ico-search.svg"
 
@@ -7,6 +8,24 @@ const ProductList = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleBackButton = (event) => {
+      event.preventDefault();
+      if (window.history.length > 1) {
+        navigate(-1); // 바로 이전 페이지로 이동
+      } else {
+        navigate("/"); // 뒤로 갈 곳이 없으면 홈으로 이동
+      }
+    };
+
+    window.addEventListener("popstate", handleBackButton);
+
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
