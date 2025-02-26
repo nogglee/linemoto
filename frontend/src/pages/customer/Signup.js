@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { signupUser } from "../../api/auth";
 
-const SignupForm = ({ onSignup }) => {
+const SignupForm = () => { // onSignup prop 제거
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -11,13 +12,11 @@ const SignupForm = ({ onSignup }) => {
   const [day, setDay] = useState("");
   const [isChecked, setIsChecked] = useState(false);
 
-  // 📌 휴대폰번호 숫자만 입력
   const handlePhoneChange = (e) => {
-    const onlyNums = e.target.value.replace(/\D/g, ""); // 숫자만 남기기
+    const onlyNums = e.target.value.replace(/\D/g, "");
     setPhone(onlyNums);
   };
 
-  // 📌 생년월일 6자리 변환
   const getBirthValue = () => {
     if (year && month && day) {
       return `${year.slice(-2)}${month.padStart(2, "0")}${day.padStart(2, "0")}`;
@@ -25,22 +24,24 @@ const SignupForm = ({ onSignup }) => {
     return "";
   };
 
-  // 📌 제출 핸들러
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name) return toast.error("이름을 입력해 주세요!");
     if (!phone) return toast.error("휴대폰번호를 입력해 주세요!");
     if (!year || !month || !day) return toast.error("생년월일을 입력해 주세요!");
+    if (!isChecked) return toast.error("개인정보 동의에 체크해 주세요!");
 
     const userData = { name, phone, birth: getBirthValue() };
     console.log("회원가입 데이터:", userData);
 
-    if (onSignup) onSignup(userData);
-
-    toast.success("회원가입이 완료되었습니다!", { position: "top-center", autoClose: 2000 });
-
-    setTimeout(() => navigate("/login"), 2000); // ✅ 중복 제거, 2초 후 로그인 페이지 이동
+    try {
+      await signupUser(userData); // 백엔드와 통신
+      toast.success("회원가입이 완료되었습니다!", { position: "top-center", autoClose: 2000 });
+      setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      toast.error("회원가입에 실패했습니다. 다시 시도해 주세요.");
+    }
   };
 
   return (

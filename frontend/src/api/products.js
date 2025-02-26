@@ -1,8 +1,6 @@
 import apiClient from "./index";
 import { getSupabaseClient } from "./supabase";
 
-console.log("🛠 ProductList 마운트됨");
-// 상품 추가하기
 export const addProduct = async ({ name, price, stock, category, image_url }) => {
   try {
     const response = await apiClient.post("/products", {
