@@ -12,6 +12,7 @@ import CategoryList from "./pages/customer/CategoryList";
 import Header from "./pages/common/Header";
 import POS from "./pages/admin/POS";
 import ProductManagement from "./pages/admin/ProductManagement";
+import Signup from "./pages/customer/Signup"; 
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,8 +25,6 @@ function App() {
     }
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
   return (
     <Router>
       {/* ✅ 관리자(admin)는 Header 숨김, 고객/비회원은 Header 표시 */}
@@ -33,13 +32,18 @@ function App() {
 
       <Routes>
         {/* ✅ 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
-  <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} />
+        <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} />
 
-  {/* ✅ 상품 목록 페이지 (카테고리 선택 후 이동) */}
-  <Route path="/products" element={<ProductList />} />
+        {/* ✅ 상품 목록 페이지 (카테고리 선택 후 이동) */}
+        <Route path="/products" element={<ProductList />} />
 
         {/* ✅ 로그인 페이지 */}
         <Route path="/login" element={<Login setUser={setUser} />} />
+
+        {/* 🔹 회원가입 페이지 라우팅 */}
+        
+        <Route path="/signup" element={<Signup />} /> 
+        
 
         {/* ✅ 관리자 레이아웃 */}
         <Route path="/admin/*" element={user?.role === "admin" ? <AdminLayout user={user} setUser={setUser} /> : <Navigate to="/" />}>

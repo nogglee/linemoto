@@ -1,9 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {ReactComponent as Logo } from "../../assets/icons/logo.svg"
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = JSON.parse(localStorage.getItem("user")); // 사용자 정보 가져오기
   const isLoggedIn = !!user;
   const isAdmin = user?.role === "admin";
@@ -31,8 +32,18 @@ const Header = () => {
                 </div>
               </Link>
             )
+          ) : location.pathname === "/login" ? (
+            <Link to="/signup" className="px-4 py-2 bg-green-500 text-white rounded">
+              회원가입
+            </Link>
+          ) : location.pathname === "/signup" ? (
+            <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
+              로그인
+            </Link>
           ) : (
-            <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded">로그인</Link>
+            <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
+              로그인
+            </Link>
           )}
           {isLoggedIn && (
             <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded">

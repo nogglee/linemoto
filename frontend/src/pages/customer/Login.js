@@ -45,7 +45,7 @@ const Login = ({ setUser }) => {
         />
         <input
           type="password"
-          placeholder="비밀번호"
+          placeholder="생년월일 6자리"
           className="w-full p-2 border rounded mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
