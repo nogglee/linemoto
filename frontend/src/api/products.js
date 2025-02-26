@@ -1,6 +1,7 @@
 import apiClient from "./index";
-import supabase from "./supabase";
+import { getSupabaseClient } from "./supabase";
 
+console.log("🛠 ProductList 마운트됨");
 // 상품 추가하기
 export const addProduct = async ({ name, price, stock, category, image_url }) => {
   try {
@@ -18,6 +19,44 @@ export const addProduct = async ({ name, price, stock, category, image_url }) =>
     return null;
   }
 };
+
+// 전체 카테고리 목록 불러오기
+export const getCategories = async () => {
+  
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.rpc("get_categories");
+
+  if (error) {
+    console.error("❌ 카테고리 목록 불러오기 오류:", error.message);
+    return [];
+  }
+
+  return data;
+};
+
+// 특정 카테고리 상품만 가져오기 (고객 페이지용)
+export const getProductsByCategory = async (category, schema = "shops") => {
+  console.log(`🛠 [${category}] 카테고리 상품 가져오기 시작`); // ✅ 실행 여부 확인
+
+  if (!category) return [];
+
+  const supabase = getSupabaseClient(schema);
+  console.log(`🛠 Supabase에서 [${category}] 카테고리 상품 가져오는 중...`);
+
+  const { data, error } = await supabase
+    .from("shops.products")
+    .select("*")
+    .eq("category", category);
+
+  if (error) {
+    console.error(`❌ [${category}] 카테고리 상품 불러오기 오류:`, error.message);
+    return [];
+  }
+
+  console.log(`🛠 [${category}] 가져온 상품 데이터:`, data);
+  return data;
+};
+
 
 // 상품 목록 불러오기
 export const getProducts = async () => {
@@ -80,7 +119,7 @@ export const deleteProducts = async (productIds) => {
 
 // 기본 이미지 URL 가져오기
 export const getDefaultImageUrl = () => {
-  const { data } = supabase.storage.from("product-images").getPublicUrl("default.png");
+  const { data } = getSupabaseClient().storage.from("product-images").getPublicUrl("default.png");
 
   console.log("🛠 Default Image URL:", data?.publicUrl); // 🔥 확인용 로그
   return data?.publicUrl || "/default.png"; // URL이 없으면 로컬 기본 이미지
@@ -93,7 +132,7 @@ const sanitizeFileName = (fileName) => {
 // 이미지 업로드 API
 export const uploadImage = async (file) => {
   const sanitizedFileName = sanitizeFileName(`${Date.now()}-${file.name}`); // 파일 이름 정리
-  const { data, error } = await supabase.storage
+  const { data, error } = await getSupabaseClient().storage
     .from('product-images') // 버킷 이름
     .upload(sanitizedFileName, file);
 

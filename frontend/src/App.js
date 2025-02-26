@@ -8,6 +8,7 @@ import Login from "./pages/customer/Login";
 import AdminLayout from "./pages/admin/Layout";
 import CustomerLayout from "./pages/customer/Layout";
 import ProductList from "./pages/customer/ProductList";
+import CategoryList from "./pages/customer/CategoryList";
 import Header from "./pages/common/Header";
 import POS from "./pages/admin/POS";
 import ProductManagement from "./pages/admin/ProductManagement";
@@ -23,14 +24,19 @@ function App() {
     }
   }, []);
 
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   return (
     <Router>
       {/* ✅ 관리자(admin)는 Header 숨김, 고객/비회원은 Header 표시 */}
       {user?.role !== "admin" && <Header user={user} setUser={setUser} />}
 
       <Routes>
-        {/* ✅ 기본 진입 페이지 (로그인 전: ProductList, 로그인 후: role에 맞게 이동) */}
-        <Route path="/" element={!user ? <ProductList /> : <Navigate to={`/${user.role}`} />} />
+        {/* ✅ 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
+  <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} />
+
+  {/* ✅ 상품 목록 페이지 (카테고리 선택 후 이동) */}
+  <Route path="/products" element={<ProductList />} />
 
         {/* ✅ 로그인 페이지 */}
         <Route path="/login" element={<Login setUser={setUser} />} />
