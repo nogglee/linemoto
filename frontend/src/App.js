@@ -32,7 +32,8 @@ function App() {
 
       <Routes>
         {/* ✅ 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
-        <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} />
+        {/* <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} /> */}
+        <Route path="/" element={<CategoryList />} />
 
         {/* ✅ 상품 목록 페이지 (카테고리 선택 후 이동) */}
         <Route path="/products" element={<ProductList />} />
