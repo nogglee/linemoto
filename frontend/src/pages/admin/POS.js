@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getProducts } from "../../api/products";
 import { getMemberInfo } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
+import PaymentPanel from "./PaymentPanel";
 
 const POS = () => {
   const [products, setProducts] = useState([]);
@@ -89,7 +90,7 @@ const POS = () => {
   };
 
   return (
-    <div className="flex max-h-screen w-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] overflow-hidden font-body">
+    <div className="flex h-full w-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] overflow-hidden font-body">
       {/* 🔹 상품 목록 */}
       <div className="w-full p-8">
         {/* 🔹 카테고리 필터 */}
@@ -130,6 +131,7 @@ const POS = () => {
       </div>
 
       {/* 🔹 결제 패널 */}
+      <PaymentPanel />
       <div className="w-[320px] bg-white p-6 border-l border-gray-200">
         <div className="flex justify-between mb-4">
           <h2 className="font-semibold">결제서제</h2>

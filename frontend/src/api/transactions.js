@@ -10,3 +10,19 @@ export const submitTransaction = async (transactionData) => {
     return null;
   }
 };
+
+// 🔹 회원 포인트 조회
+export const fetchMemberPoints = async (memberId) => {
+  const { data } = await apiClient.get(`/members/${memberId}/points`);
+  return data?.points || 0;
+};
+
+// 🔹 회원 포인트 업데이트
+export const updateMemberPoints = async (memberId, newPoints) => {
+  await apiClient.put(`/members/${memberId}/points`, { points: newPoints });
+};
+
+// 🔹 상품 재고 차감
+export const updateStock = async (productId, count) => {
+  await apiClient.put(`/products/${productId}/decrease-stock`, { count });
+};
