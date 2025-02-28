@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getProducts } from "../../api/products";import { useSearchParams } from "react-router-dom";
+import { getProductsByCategory } from "../../api/products"; // ✅ 변경된 API 함수 가져오기
+import { useSearchParams } from "react-router-dom";
 import SearchBar from "../common/components/SearchBar";
-import { getChoseong } from 'es-hangul';
+import { getChoseong } from "es-hangul";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -11,37 +12,31 @@ const ProductList = () => {
   const selectedCategory = searchParams.get("category");
 
   useEffect(() => {
+    if (!selectedCategory) return;
+
     const fetchProducts = async () => {
-      const allProducts = await getProducts();
-      setProducts(allProducts);
+      const categoryProducts = await getProductsByCategory(selectedCategory); // ✅ 고객용 API 사용
+      setProducts(categoryProducts);
+      setFilteredProducts(categoryProducts); // 검색 대비 초기값 설정
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
+  // ✅ 검색 필터링
   useEffect(() => {
-    console.log(`🛠 선택한 카테고리: ${selectedCategory}`);
-    console.log(`🛠 검색어: ${searchTerm}`);
-
-    let filtered = products;
-
-    // 1. 카테고리 필터링
-    if (selectedCategory) {
-      filtered = filtered.filter((product) => product.category === selectedCategory);
-      console.log(`🛠 [${selectedCategory}] 카테고리로 필터링된 상품:`, filtered);
+    if (!searchTerm) {
+      setFilteredProducts(products);
+      return;
     }
 
-    // 2. 검색어 필터링
-    if (searchTerm) {
-      filtered = filtered.filter((product) => {
-        const productChoseong = getChoseong(product.name);
-        return productChoseong.includes(getChoseong(searchTerm));
-      });
-      console.log(`🛠 [${searchTerm}] 검색어로 필터링된 상품:`, filtered);
-    }
+    const filtered = products.filter((product) => {
+      const productChoseong = getChoseong(product.name);
+      return productChoseong.includes(getChoseong(searchTerm));
+    });
 
     setFilteredProducts(filtered);
-  }, [selectedCategory, products, searchTerm]); // searchTerm 추가
+  }, [searchTerm, products]);
 
   return (
     <div className="w-full mt-4 px-4 md:px-[160px] lg:px-[200px]">

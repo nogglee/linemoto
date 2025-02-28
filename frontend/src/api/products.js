@@ -32,27 +32,19 @@ export const getCategories = async () => {
   return data;
 };
 
-// 특정 카테고리 상품만 가져오기 (고객 페이지용)
-export const getProductsByCategory = async (category, schema = "shops") => {
-  console.log(`🛠 [${category}] 카테고리 상품 가져오기 시작`); // ✅ 실행 여부 확인
+// 특정 카테고리 상품 가져오기 (고객 페이지 전용 API)
+export const getProductsByCategory = async (category) => {
+  try {
+    console.log(`🛠 [${category}] 카테고리 상품 가져오기 시작`);
 
-  if (!category) return [];
-
-  const supabase = getSupabaseClient(schema);
-  console.log(`🛠 Supabase에서 [${category}] 카테고리 상품 가져오는 중...`);
-
-  const { data, error } = await supabase
-    .from("shops.products")
-    .select("*")
-    .eq("category", category);
-
-  if (error) {
+    const response = await apiClient.get(`/products/category/${encodeURIComponent(category)}`);
+    console.log(`🛠 [${category}] 가져온 상품 데이터:`, response.data);
+    
+    return response.data;
+  } catch (error) {
     console.error(`❌ [${category}] 카테고리 상품 불러오기 오류:`, error.message);
     return [];
   }
-
-  console.log(`🛠 [${category}] 가져온 상품 데이터:`, data);
-  return data;
 };
 
 

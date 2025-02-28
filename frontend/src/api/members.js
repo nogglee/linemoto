@@ -1,23 +1,40 @@
 import apiClient from "./index";
 
-// 특정 회원 정보 불러오기 (포인트 포함)
-export const getMemberInfo = async (memberId) => {
+// 회원 목록 조회
+export const fetchMembers = async () => {
   try {
-    const response = await apiClient.get(`/members/${memberId}`);
+    const response = await apiClient.get("/members");
+    console.log("fetchMembers response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ 회원 정보 가져오기 실패:", error);
-    return null;
+    console.error("Failed to fetch members:", error.response?.data || error.message);
+    throw error;
   }
 };
 
-// 회원 포인트 업데이트 (사용 or 지급)
-export const updateMemberPoints = async (memberId, points) => {
+// 특정 회원 정보 조회
+export const fetchMemberInfo = async (memberId) => {
   try {
-    const response = await apiClient.patch(`/members/${memberId}/points`, { points });
+    const response = await apiClient.get(`/members/${memberId}`);
+    console.log("fetchMemberInfo response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("❌ 포인트 업데이트 실패:", error);
-    return null;
+    console.error(`Failed to fetch member ${memberId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// 포인트 업데이트
+export const updateMemberPoints = async (memberId, points, reason) => {
+  try {
+    const response = await apiClient.patch(`/members/${memberId}/points`, {
+      points,
+      reason,
+    });
+    console.log("updateMemberPoints response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to update points for member ${memberId}:`, error.response?.data || error.message);
+    throw error;
   }
 };

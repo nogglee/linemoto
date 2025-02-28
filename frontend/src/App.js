@@ -15,15 +15,20 @@ import ProductManagement from "./pages/admin/ProductManagement";
 import Signup from "./pages/customer/Signup"; 
 
 function App() {
-  const [user, setUser] = useState(null);
-
-  // ✅ localStorage에서 사용자 정보 불러오기 (새로고침해도 유지)
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
+    // ✅ 초기값을 localStorage에서 직접 가져오도록 설정
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  // ✅ user가 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user"); // 로그아웃 시 제거
     }
-  }, []);
+  }, [user]);
 
   return (
     <Router>

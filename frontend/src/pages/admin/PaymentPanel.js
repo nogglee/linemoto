@@ -1,16 +1,61 @@
 import React, { useState, useEffect } from "react";
-import { fetchMemberPoints, updateMemberPoints, updateStock } from "../../api/transactions"; // API 호출
-// import MemberSelectModal from "./MemberSelectModal"; // 회원 선택 팝업
+import { fetchMemberInfo, fetchMembers, updateMemberPoints } from "../../api/members";
+import { submitTransaction } from "../../api/transactions";
+import SelectMemberModal from "./components/SelectMemeberModal";
 
-const PaymentPanel = ({ cartItems = [], setCartItems }) => {
-  const [selectedMember, setSelectedMember] = useState(null);
+const PaymentPanel = ({
+  cartItems = [],
+  setCartItems,
+  addToCart,
+  removeFromCart,
+  selectedMember,
+  setSelectedMember,
+  usedPoints,
+  setUsedPoints,
+  handleSelectMember,
+  handlePointChange,
+  handlePayment,
+}) => {
   const [memberPoints, setMemberPoints] = useState(0);
-  const [usedPoints, setUsedPoints] = useState(0);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
-  const [items, setItems] = useState([]); // ✅ 빈 배열로 초기화
-  
+  const [members, setMembers] = useState([]);
+
+  // ✅ 회원 포인트 조회
+  useEffect(() => {
+    if (selectedMember) {
+      const fetchPoints = async () => {
+        try {
+          const member = await fetchMemberInfo(selectedMember.id);
+          setMemberPoints(member.points);
+        } catch (error) {
+          console.error("Failed to fetch member points:", error);
+          setMemberPoints(0);
+        }
+      };
+      fetchPoints();
+    }
+  }, [selectedMember]);
+
+  // ✅ 회원 목록 불러오기
+  useEffect(() => {
+    const loadMembers = async () => {
+      try {
+        const memberList = await fetchMembers();
+        setMembers(memberList);
+      } catch (error) {
+        console.error("Failed to load members:", error);
+        setMembers([]);
+      }
+    };
+    loadMembers();
+  }, []);
+
   // 🛠 총 결제 금액 계산
-  const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.count, 0);
+  const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  // 🛠 전체 상품 선택 개수 계산 (quantity 합산)
+  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
   // 🛠 상품 삭제 핸들러
   const removeItem = (itemId) => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
@@ -21,131 +66,98 @@ const PaymentPanel = ({ cartItems = [], setCartItems }) => {
     setCartItems([]);
   };
 
-  // 🛠 수량 변경 핸들러 (+ / - 버튼)
-  const updateCount = (itemId, delta) => {
-    setCartItems(cartItems.map((item) => 
-      item.id === itemId ? { ...item, count: Math.max(1, item.count + delta) } : item
-    ));
-  };
-
   // 🛠 회원 선택 핸들러
-  const handleMemberSelect = async (member) => {
+  const onSelectMember = async (member) => {
     setSelectedMember(member);
     setIsMemberModalOpen(false);
-    
-    // 회원 포인트 조회
-    const points = await fetchMemberPoints(member.id);
-    setMemberPoints(points);
-  };
-
-  // 🛠 회원 선택 해제
-  const clearMember = () => {
-    setSelectedMember(null);
-    setMemberPoints(0);
-    setUsedPoints(0);
-  };
-
-  // 🛠 포인트 사용 핸들러
-  const handleUsedPointsChange = (e) => {
-    let value = parseInt(e.target.value, 10) || 0;
-    if (value > memberPoints) value = memberPoints; // 보유 포인트 초과 방지
-    setUsedPoints(value);
-  };
-
-  // 🛠 결제 처리
-  const handlePayment = async () => {
-    if (cartItems.length === 0) return alert("선택된 상품이 없습니다.");
-
-    // 🔹 재고 차감
-    await Promise.all(cartItems.map((item) => updateStock(item.id, item.count)));
-
-    // 🔹 회원 포인트 적립 (1만원 이상 결제 시 10%)
-    if (selectedMember) {
-      const earnedPoints = totalAmount >= 10000 ? Math.floor(totalAmount * 0.1) : 0;
-      const newPoints = memberPoints - usedPoints + earnedPoints;
-      await updateMemberPoints(selectedMember.id, newPoints);
-      alert(`결제 완료! ${earnedPoints}p 적립되었습니다.`);
-    } else {
-      alert("결제 완료!");
-    }
-
-    // 🔹 장바구니 비우기
-    setCartItems([]);
-    setSelectedMember(null);
-    setMemberPoints(0);
-    setUsedPoints(0);
   };
 
   return (
-    <div className="p-4 border rounded-lg shadow-md bg-white">
-      {/* 🛒 전체 삭제 & 상품 개수 */}
-      <div className="flex justify-between mb-2">
-        <button onClick={clearCart} className="text-red-500">전체삭제</button>
-        <span className="text-gray-600">{cartItems.length}건</span>
+    <div className="w-[320px] bg-white p-6 border-l border-gray-200">
+      {/* 🔹 전체 삭제 & 상품 개수 */}
+      <div className="flex justify-between mb-4">
+        <button className="text-red-500" onClick={clearCart}>
+          전체삭제
+        </button>
+        <span className="text-gray-600">{totalQuantity}건</span>
       </div>
 
-      {/* 🛒 상품 리스트 */}
-      {cartItems.map((item) => (
-        <div key={item.id} className="flex justify-between items-center py-2 border-b">
-          <button onClick={() => removeItem(item.id)} className="text-red-500">삭제</button>
-          <span>{item.name}</span>
-          <div className="flex items-center">
-            <button onClick={() => updateCount(item.id, -1)} className="px-2">-</button>
-            <span className="mx-2">{item.count}</span>
-            <button onClick={() => updateCount(item.id, 1)} className="px-2">+</button>
-          </div>
-          <span>{(item.price * item.count).toLocaleString()} 원</span>
-        </div>
-      ))}
-
-      {/* 👤 회원 선택 */}
-      <div className="mt-4 p-3 bg-gray-100 rounded">
-        <div className="flex items-center">
-          <span className="mr-2">회원</span>
-          {selectedMember ? (
-            <div className="flex items-center">
-              <span className="mr-2">{selectedMember.name}</span>
-              <button onClick={clearMember} className="text-red-500">✕</button>
+      {/* 🔹 상품 리스트 */}
+      {cartItems.length === 0 ? (
+        <p className="text-gray-400">선택된 상품 없음</p>
+      ) : (
+        cartItems.map((item) => (
+          <div key={item.id} className="flex justify-between items-center mb-2">
+            <button className="text-red-500" onClick={() => removeItem(item.id)}>
+              삭제
+            </button>
+            <span className="flex-1">{item.name}</span>
+            <div className="flex items-center space-x-2">
+              <button className="border px-2" onClick={() => removeFromCart(item)}>
+                -
+              </button>
+              <span>{item.quantity}</span>
+              <button className="border px-2" onClick={() => addToCart(item)}>
+                +
+              </button>
             </div>
-          ) : (
-            <button onClick={() => setIsMemberModalOpen(true)} className="text-blue-500">선택</button>
-          )}
+            <span className="font-bold">{(item.price * item.quantity).toLocaleString()}</span>
+          </div>
+        ))
+      )}
+
+      {/* 🔹 회원 선택 */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-semibold">회원</span>
         </div>
-        {/* 보유 포인트 */}
-        {selectedMember && (
-          <>
-            <div className="mt-2">보유포인트: {memberPoints.toLocaleString()}p</div>
-            {/* 포인트 사용 (5만 이상) */}
-            {memberPoints >= 50000 && (
-              <div className="mt-2">
-                <label>포인트 사용</label>
-                <input
-                  type="number"
-                  value={usedPoints}
-                  onChange={handleUsedPointsChange}
-                  className="border rounded p-1 w-full"
-                />
-              </div>
-            )}
-          </>
-        )}
+        <div className="flex items-center mt-2">
+          <input
+            type="text"
+            placeholder="회원 검색"
+            className="border p-2 w-full rounded mr-2"
+            value={selectedMember ? selectedMember.name : ""}
+            readOnly
+          />
+          <button
+            className="bg-gray-200 text-black px-3 py-2 rounded"
+            onClick={() => setIsMemberModalOpen(true)}
+          >
+            선택
+          </button>
+        </div>
       </div>
 
-      {/* 💰 결제 버튼 */}
-      <button
-        onClick={handlePayment}
-        className="w-full bg-black text-white p-3 mt-4 rounded-lg"
-      >
-        {totalAmount.toLocaleString()}원 결제 ({cartItems.length})
-      </button>
+      {/* 🔹 포인트 사용 */}
+      {selectedMember && (
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-gray-600">보유포인트</span>
+          <span className="text-gray-600">{memberPoints.toLocaleString()}p</span>
+        </div>
+      )}
+      {selectedMember && (
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-gray-600">포인트 사용</span>
+          <span className="text-gray-600">{usedPoints.toLocaleString()}p</span>
+        </div>
+      )}
+
+      {/* 🔹 결제 버튼 */}
+      <div className="mt-4">
+        <button
+          className="w-full bg-black text-white py-3 rounded-lg"
+          onClick={() => handlePayment("카드")}
+        >
+          {totalAmount.toLocaleString()}원 결제 {totalQuantity} {/* cartItems.length → totalQuantity */}
+        </button>
+      </div>
 
       {/* 🔹 회원 선택 모달 */}
-      {/* {isMemberModalOpen && (
-        <MemberSelectModal 
-          onClose={() => setIsMemberModalOpen(false)} 
-          onSelect={handleMemberSelect} 
-        />
-      )} */}
+      <SelectMemberModal
+        isOpen={isMemberModalOpen}
+        onClose={() => setIsMemberModalOpen(false)}
+        onSelect={onSelectMember}
+      />
     </div>
   );
 };
