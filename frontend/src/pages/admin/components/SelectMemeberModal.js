@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchMembers } from "../../../api/members";
+import { getChoseong } from "es-hangul";
+import SearchBar from "../../common/components/SearchBar";
 
 const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
   const [members, setMembers] = useState([]);
@@ -21,9 +23,16 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
     }
   }, [isOpen]);
 
-  const filteredMembers = members.filter((member) =>
-    member.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMembers = members.filter((member) => {
+    if (!searchTerm) return true; // 검색어 없으면 전체 표시
+    const nameChoseong = getChoseong(member.name); // 초성 변환
+    const phoneNumber = member.phone_number?.replace(/-/g, ""); // 전화번호 '-' 제거 후 검색
+
+    return (
+      nameChoseong.includes(getChoseong(searchTerm)) || // 초성 검색
+      phoneNumber.includes(searchTerm) // 번호 검색
+    );
+  });
 
   const handleClose = () => {
     setSearchTerm("");
@@ -43,12 +52,10 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
         </div>
 
         <div className="mb-4">
-          <input
-            type="text"
-            placeholder="회원 검색"
-            className="border p-2 w-full rounded"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            placeholder="회원명 또는 휴대폰번호로 검색해 보세요"
           />
         </div>
 
