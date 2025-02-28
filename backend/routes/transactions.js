@@ -23,19 +23,6 @@ router.post("/", async (req, res) => {
       items 
     } = req.body;
 
-    console.log("🚀 서버에서 받은 데이터:", {
-      admin_id,
-      admin_name,
-      customer_id,
-      total_amount,
-      discount,
-      adjustment,
-      adjustment_reason,
-      final_amount,
-      earned_points,
-      payment_method,
-    });
-
     const calculatedEarnedPoints = final_amount >= 10000 ? Math.floor(final_amount * 0.1) : 0;
     if (earned_points !== calculatedEarnedPoints) {
       throw new Error("Earned points mismatch");
@@ -91,6 +78,47 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "결제 실패" });
   } finally {
     client.release();
+  }
+});
+
+router.get("/sales/:admin_id", async (req, res) => {
+  const { admin_id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        s.id, 
+        s.final_amount, 
+        s.discount, 
+        s.payment_method, 
+        s.created_at,
+        s.admin_name,
+        a.name AS customer_name,
+        ROUND(s.final_amount * 0.1) AS earned_points,
+        s.adjustment,
+        s.adjustment_reason,
+        json_agg(json_build_object(
+          'product_id', sd.product_id,
+          'name', p.name,
+          'quantity', sd.quantity,
+          'price', sd.price
+        )) AS items
+      FROM transactions.sales s
+      JOIN users.accounts a ON s.customer_id = a.id
+      JOIN transactions.sales_details sd ON s.id = sd.sale_id
+      JOIN shops.products p ON sd.product_id = p.id
+      WHERE s.admin_id = $1  -- 여기서 현재 로그인한 관리자의 id 사용
+      GROUP BY 
+        s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
+        s.admin_id, s.admin_name, a.name, s.adjustment, s.adjustment_reason
+      ORDER BY s.created_at DESC;`,
+      [admin_id]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ 매출 내역 조회 오류:", err);
+    res.status(500).json({ message: "매출 내역 조회 실패" });
   }
 });
 
