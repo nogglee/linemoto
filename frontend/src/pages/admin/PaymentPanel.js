@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { fetchMemberInfo, fetchMembers, updateMemberPoints } from "../../api/members";
+import { useOutletContext } from "react-router-dom";
+import { fetchMembers } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
 import { toast } from "react-toastify";
@@ -15,18 +16,32 @@ const PaymentPanel = ({
   setUsedPoints,
   handleSelectMember,
   handlePointChange,
-  // handlePayment,
 }) => {
-  const [memberPoints, setMemberPoints] = useState(0);
+  const { user: admin } = useOutletContext();
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [members, setMembers] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState("카드"); 
+  const [adjustmentOpen, setAdjustmentOpen] = useState(false); // ✅ 조정 UI 토글 상태
+  const [adjustmentType, setAdjustmentType] = useState("discount"); // ✅ 'discount' 또는 'addition'
+  const [adjustmentAmount, setAdjustmentAmount] = useState(0); // ✅ 추가/차감 금액
+  const [adjustmentReason, setAdjustmentReason] = useState(""); // ✅ 사유 입력
+  const [appliedAdjustment, setAppliedAdjustment] = useState(0);
+
+  
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const maxUsablePoints = Math.min(selectedMember?.points || 0, totalAmount); // 최대 사용 가능 
-  // 포인트 (보유 포인트와 상품 총액 중 작은 값)
-  const finalAmount = totalAmount - usedPoints; // ✅ 실제 결제 금액
-  const earnedPoints = Math.floor(finalAmount * 0.1); // ✅ 10% 적립 (소수점 제거)
+  const maxDiscount = totalAmount; // ✅ 할인 최대 한도 = 상품 총 가격
+  const validDiscount = Math.min(usedPoints, maxDiscount);
+  
+  const adjustedAmount = adjustmentType === "discount"
+    ? -Math.min(Math.abs(adjustmentAmount), maxDiscount) // ✅ 할인은 상품 가격을 넘을 수 없음
+    : Math.abs(adjustmentAmount); // ✅ 추가 금액은 제한 없음
 
+  const finalAmountBeforePoints = totalAmount + appliedAdjustment; // 조정 금액 반영 후 금액
+  const finalAmount = Math.max(finalAmountBeforePoints - usedPoints, 0); // 포인트 사용 후 최소 0원
 
+  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const maxUsablePoints = Math.min(selectedMember?.points || 0, finalAmountBeforePoints); // 최대 사용 가능 
+  const earnedPoints = finalAmount >= 10000 ? Math.floor(finalAmount * 0.1) : 0;
 
   // ✅ 회원 선택 시 포인트 사용 초기화
   useEffect(() => {
@@ -47,12 +62,6 @@ const PaymentPanel = ({
     loadMembers();
   }, []);
 
-  // 🛠 총 결제 금액 계산
-  
-
-  // 🛠 전체 상품 선택 개수 계산 (quantity 합산)
-  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-
   // 🛠 상품 삭제 핸들러
   const removeItem = (itemId) => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
@@ -63,10 +72,19 @@ const PaymentPanel = ({
     setCartItems([]);
   };
 
-  // 🛠 회원 선택 핸들러
-  const onSelectMember = async (member) => {
-    setSelectedMember(member);
-    setIsMemberModalOpen(false);
+  const applyAdjustment = () => {
+    if (!adjustmentReason.trim()) {
+      alert("사유를 입력해주세요.");
+      return;
+    }
+    setAppliedAdjustment(adjustedAmount);
+    setAdjustmentOpen(false);
+  };
+
+  const removeAdjustment = () => {
+    setAppliedAdjustment(0);
+    setAdjustmentAmount(0);
+    setAdjustmentReason("");
   };
 
   const handlePayment = async (paymentMethod) => {
@@ -76,11 +94,15 @@ const PaymentPanel = ({
     }
   
     const transactionData = {
-      admin_id: 1, // 관리자 ID (임시)
+      admin_id: admin.id, // ✅ 관리자 ID
+      admin_name: admin.name, // ✅ 관리자 이름 추가
       customer_id: selectedMember.id,
       total_amount: totalAmount,
       discount: usedPoints,
-      final_amount: totalAmount - usedPoints,
+      adjustment: adjustmentAmount ? adjustedAmount : 0, // ✅ 추가/차감 금액
+      adjustment_reason: adjustmentReason.trim(), // ✅ 조정 사유
+      final_amount: finalAmount, // ✅ 최종 결제 금액
+      earned_points: earnedPoints,
       payment_method: paymentMethod,
       items: cartItems.map((item) => ({
         product_id: item.id,
@@ -91,18 +113,22 @@ const PaymentPanel = ({
   
     const response = await submitTransaction(transactionData);
     if (response) {
-      // ✅ 관리자 페이지에서는 결제 완료 후 토스트만 표시하고 끝냄
       toast.success("✅ 결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
 
       // ✅ UI 초기화
       setCartItems([]);
       setUsedPoints(0);
       setSelectedMember(null);
+      setPaymentMethod("카드");
+      setAdjustmentAmount(0);
+      setAdjustmentReason("");
+      setAdjustmentOpen(false);
+      setAppliedAdjustment(0);
     }
   };
 
   return (
-    <div className="w-[320px] bg-white p-6 border-l border-gray-200">
+    <div className="w-[320px] bg-white p-6 border-l border-gray-200 overflow-auto">
       {/* 🔹 전체 삭제 & 상품 개수 */}
       <div className="flex justify-between mb-4">
         <button className="text-red-500" onClick={clearCart}>
@@ -135,6 +161,95 @@ const PaymentPanel = ({
         ))
       )}
 
+      {/* 🔹 최종 결제 금액 */}
+      <div className="mb-4 text-right text-gray-700 flex justify-between items-center">
+        금액
+        <span className="font-bold">{finalAmount.toLocaleString()}원</span>
+        <button
+          className="ml-2 px-2 py-1 border rounded text-gray-700 hover:bg-gray-200"
+          onClick={() => setAdjustmentOpen(!adjustmentOpen)}
+        >
+          {adjustmentOpen ? "✕" : "+"}
+        </button>
+      </div>
+
+      {/* 🔹 결제금액 조정 UI */}
+      {adjustmentOpen && (
+        <div className="mb-4 border p-3 rounded-lg bg-gray-100">
+          <div className="mb-2">
+            <label className="block text-gray-700">조정 타입</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="adjustmentType"
+                  value="discount"
+                  checked={adjustmentType === "discount"}
+                  onChange={() => setAdjustmentType("discount")}
+                  min="0"
+                  max={adjustmentType === "discount" ? maxDiscount : undefined}
+                />
+                <span>할인</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="adjustmentType"
+                  value="addition"
+                  checked={adjustmentType === "addition"}
+                  onChange={() => setAdjustmentType("addition")}
+                />
+                <span>추가</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-2">
+            <label className="block text-gray-700">조정 금액</label>
+            <input
+              type="number"
+              className="border rounded-lg p-2 w-full text-right"
+              value={adjustmentAmount}
+              onChange={(e) => setAdjustmentAmount(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700">조정 사유</label>
+            <input
+              type="text"
+              className="border rounded-lg p-2 w-full"
+              value={adjustmentReason}
+              onChange={(e) => setAdjustmentReason(e.target.value)}
+            />
+          </div>
+
+          <button
+            className="w-full bg-blue-500 text-white py-2 rounded-lg mt-2"
+            onClick={applyAdjustment}
+          >
+            조정금액 적용
+          </button>
+        </div>
+      )}
+
+      {/* 🔹 조정 금액 표시 */}
+      {appliedAdjustment !== 0 && (
+        <div className="mb-2 text-right text-gray-700 flex justify-between items-center">
+          <span>
+            {appliedAdjustment < 0
+              ? `- ${Math.abs(appliedAdjustment).toLocaleString()}원`
+              : `+ ${Math.abs(appliedAdjustment).toLocaleString()}원`}
+          </span>
+          <button
+            className="text-red-500 hover:text-red-700"
+            onClick={removeAdjustment}
+          >
+            ❌
+          </button>
+        </div>
+      )}
+
       {/* 🔹 회원 선택 */}
       {/* ✅ 회원 선택 */}
       <div className="mb-4">
@@ -160,6 +275,41 @@ const PaymentPanel = ({
           )}
         </div>
       </div>
+
+      
+
+      {/* 🔹 결제수단 선택 (라디오 버튼) */}
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-1">결제 수단</label>
+        <div className="grid grid-cols-2 gap-2">
+          {["카드", "현금", "계좌이체", "미수금"].map((method) => (
+            <label
+              key={method}
+              className={`border rounded-lg p-3 text-center cursor-pointer ${
+                paymentMethod === method ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value={method}
+                checked={paymentMethod === method}
+                onChange={(e) => {
+                  setPaymentMethod(e.target.value);
+                }}
+                className="hidden"
+              />
+              {method}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      
+
+      
+
+      
 
       {/* ✅ 보유 포인트 */}
       <div className="mb-4">
@@ -189,27 +339,6 @@ const PaymentPanel = ({
         />
       </div>
 
-      {/* ✅ 장바구니 리스트 */}
-      <div className="mb-4 border-t pt-4">
-        <h3 className="text-lg font-semibold mb-2">장바구니</h3>
-        {cartItems.length === 0 ? (
-          <p className="text-gray-500">상품이 없습니다.</p>
-        ) : (
-          <ul>
-            {cartItems.map((item) => (
-              <li key={item.id} className="flex justify-between items-center mb-2">
-                <span>{item.name} x {item.quantity}</span>
-                <span className="font-bold">{(item.price * item.quantity).toLocaleString()}원</span>
-                <div className="flex space-x-2">
-                  <button className="px-2 py-1 bg-gray-300 rounded" onClick={() => removeFromCart(item)}>-</button>
-                  <button className="px-2 py-1 bg-gray-900 text-white rounded" onClick={() => addToCart(item)}>+</button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       {/* ✅ 적립 예정 포인트 */}
       <div className="mb-4 text-right text-gray-700">
         적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
@@ -218,7 +347,7 @@ const PaymentPanel = ({
       {/* ✅ 결제 버튼 */}
       <button
         className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
-        onClick={() => handlePayment("카드")}
+        onClick={() => handlePayment(paymentMethod)}
         disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
       >
         {`${finalAmount.toLocaleString()}원 결제`}

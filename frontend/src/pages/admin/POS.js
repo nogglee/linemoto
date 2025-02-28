@@ -4,7 +4,7 @@ import { fetchMemberInfo } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
 import PaymentPanel from "./PaymentPanel";
 
-const POS = () => {
+const POS = (user) => {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -142,6 +142,7 @@ const POS = () => {
         handleSelectMember={handleSelectMember}
         handlePointChange={handlePointChange}
         handlePayment={handlePayment}
+        admin={user} 
       />
     </div>
   );
