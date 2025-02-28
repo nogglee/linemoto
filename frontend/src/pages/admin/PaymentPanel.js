@@ -96,7 +96,7 @@ const PaymentPanel = ({
     const transactionData = {
       admin_id: admin.id, // ✅ 관리자 ID
       admin_name: admin.name, // ✅ 관리자 이름 추가
-      customer_id: selectedMember.id,
+      customer_id: selectedMember.account_id,
       total_amount: totalAmount,
       discount: usedPoints,
       adjustment: adjustmentAmount ? adjustedAmount : 0, // ✅ 추가/차감 금액
@@ -126,6 +126,28 @@ const PaymentPanel = ({
       setAppliedAdjustment(0);
     }
   };
+
+  // ✅ 숫자를 0,000 형식으로 변환하는 함수
+  const formatNumber = (value) => {
+    if (!value) return ""; // 값이 없으면 빈 문자열 반환
+    const num = parseInt(value.replace(/,/g, ""), 10); // 쉼표 제거 후 숫자로 변환
+    return isNaN(num) ? "" : num.toLocaleString(); // 숫자가 아니면 빈 문자열 반환
+  };
+
+  // ✅ 포인트 사용 입력 핸들러
+  const handlePointInputChange = (e) => {
+    let value = e.target.value.replace(/,/g, ""); // 쉼표 제거
+    value = value ? Math.min(parseInt(value, 10), maxUsablePoints) : 0; // 최대 사용 가능 포인트 초과 방지
+    setUsedPoints(formatNumber(value.toString())); // 포맷 적용
+  };
+
+  // ✅ 조정 금액 입력 핸들러
+  const handleAdjustmentInputChange = (e) => {
+    let value = e.target.value.replace(/,/g, ""); // ✅ 쉼표 제거
+    value = value ? Math.abs(parseInt(value, 10)) : ""; // ✅ 음수 방지 (빈 값 허용)
+    setAdjustmentAmount(value); // ✅ 상태는 숫자로 저장
+  };
+
 
   return (
     <div className="w-[320px] bg-white p-6 border-l border-gray-200 overflow-auto">
@@ -183,8 +205,8 @@ const PaymentPanel = ({
                 <input
                   type="radio"
                   name="adjustmentType"
-                  value="discount"
                   checked={adjustmentType === "discount"}
+                  value="discount"
                   onChange={() => setAdjustmentType("discount")}
                   min="0"
                   max={adjustmentType === "discount" ? maxDiscount : undefined}

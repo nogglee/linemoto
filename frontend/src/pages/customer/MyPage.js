@@ -28,6 +28,10 @@ const MyPage = ({ user }) => {
     loadMyPageData();
   }, [user, navigate]);
 
+  const convertToKST = (utcDate) => {
+    if (!utcDate) return "시간 정보 없음"; // 값이 없으면 기본값 처리
+    return new Date(utcDate).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+  };
 
   return (
     <div className="p-6 px-4 md:px-[160px] lg:px-[200px]">
@@ -65,9 +69,9 @@ const MyPage = ({ user }) => {
                   <div className="mt-3">
                     <p>총 결제 금액: <span className="font-bold">{Math.floor((txn.final_amount ?? 0)).toLocaleString()}원</span></p>
                     <p>사용 포인트: <span className="text-red-500">{Math.floor((txn.discount ?? 0)).toLocaleString()}p</span></p>
-                    <p>적립 포인트: <span className="text-green-500">{(txn.earned_points ?? 0).toLocaleString()}p</span></p>
+                    <p>적립 포인트: <span className="text-green-500">{Math.floor((txn.earned_points ?? 0)).toLocaleString()}p</span></p>
                     <p>결제 수단: <span className="text-gray-600">{txn.payment_method || "정보 없음"}</span></p>
-                    <p className="text-gray-500 text-sm">{new Date(txn.created_at).toLocaleString()}</p>
+                    <p className="text-gray-500 text-sm">{convertToKST(txn.created_at)}</p>
                     
                     {/* ✅ 조정 금액 & 사유 (조정 금액이 0이 아닐 때만 출력) */}
                     {adjustment !== 0 && (
@@ -76,10 +80,10 @@ const MyPage = ({ user }) => {
                           {adjustment > 0 ? "🔺 추가 금액" : "🔻 할인 금액"}:{" "}
                           {Math.floor(adjustment).toLocaleString()}원
                         </span>
-                        {adjustmentReason && (
+                        {/* {adjustmentReason && (
                           <p className="text-gray-600 text-sm mt-1">사유: {adjustmentReason}</p>
                         )}
-                        <p>관리자: <span className="text-gray-700">{txn.admin_name || "없음"}</span></p>
+                        <p>관리자: <span className="text-gray-700">{txn.admin_name || "없음"}</span></p> */}
                       </div>
                     )}
                   </div>

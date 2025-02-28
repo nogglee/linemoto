@@ -14,6 +14,7 @@ import POS from "./pages/admin/POS";
 import ProductManagement from "./pages/admin/ProductManagement";
 import Signup from "./pages/customer/Signup"; 
 import MyPage from "./pages/customer/MyPage"; 
+import SalesManagement from "./pages/admin/SalesManagement";
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -59,6 +60,7 @@ function App() {
           <Route index element={<Navigate to="/admin/pos" replace />} />  {/* ✅ 기본값: POS */}
           <Route path="pos" element={<POS />} />
           <Route path="products" element={<ProductManagement />} />
+          <Route path="sales" element={<SalesManagement admin={user} />} />
         </Route>
 
         {/* ✅ 고객 레이아웃 */}

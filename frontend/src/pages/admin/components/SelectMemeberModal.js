@@ -24,14 +24,11 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
   }, [isOpen]);
 
   const filteredMembers = members.filter((member) => {
-    if (!searchTerm) return true; // 검색어 없으면 전체 표시
-    const nameChoseong = getChoseong(member.name); // 초성 변환
-    const phoneNumber = member.phone_number?.replace(/-/g, ""); // 전화번호 '-' 제거 후 검색
+    if (!searchTerm) return true;
 
-    return (
-      nameChoseong.includes(getChoseong(searchTerm)) || // 초성 검색
-      phoneNumber.includes(searchTerm) // 번호 검색
-    );
+    const nameChoseong = getChoseong(member.name); // 초성 변환
+
+    return nameChoseong.includes(getChoseong(searchTerm)); // 🔥 초성 검색만 적용
   });
 
   const handleClose = () => {
@@ -55,7 +52,7 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
           <SearchBar
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            placeholder="회원명 또는 휴대폰번호로 검색해 보세요"
+            placeholder="회원명으로 검색해 보세요"
           />
         </div>
 
