@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRouter = require("./routes/auth"); // auth.js import
 const productsRouter = require("./routes/products");
 const memberRouter = require("./routes/members");
+const transactionsRouter = require("./routes/transactions");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/auth", authRouter); // auth 라우터 사용
 app.use("/products", productsRouter);
 app.use("/members", memberRouter);
+app.use("/transactions", transactionsRouter);
 
 // 서버 시작
 app.listen(PORT, () => {

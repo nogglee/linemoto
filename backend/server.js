@@ -33,7 +33,7 @@ const transactionRouter = require("./routes/transactions");
 app.use("/auth", authRouter);  
 app.use("/products", productsRouter);  
 app.use("/members", memberRouter);
-app.use("/transactions", memberRouter);
+app.use("/transactions", transactionRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
