@@ -29,12 +29,19 @@ router.post("/", async (req, res) => {
     }
 
     // 3️⃣ 1만 원 이상 결제 시 10% 포인트 적립
-    if (final_amount >= 10000) {
-      const rewardPoints = Math.floor(final_amount * 0.1); // 정수 포인트 변환
+    if (member_id && final_amount >= 10000) {
+      const rewardPoints = Math.floor(final_amount * 0.1);
 
+      // 포인트 적립 기록
       await pool.query(
         "INSERT INTO transactions.points (customer_id, admin_id, points, reason) VALUES ($1, $2, $3, '결제 금액의 10% 적립')",
         [member_id, admin_id, rewardPoints]
+      );
+
+      // 회원 포인트 업데이트
+      await pool.query(
+        "UPDATE users.members SET points = points + $1 WHERE id = $2",
+        [rewardPoints, member_id]
       );
     }
 

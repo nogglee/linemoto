@@ -22,10 +22,12 @@ router.post("/login", async (req, res) => {
 });
 
 // 회원가입 엔드포인트 추가
+// 회원가입 엔드포인트 수정
 router.post("/signup", async (req, res) => {
   const { name, phone_number, birth } = req.body;
+
   try {
-    // 중복 전화번호 체크
+    // 1️⃣ 중복 전화번호 체크
     const checkUser = await pool.query(
       "SELECT id FROM users.accounts WHERE phone_number = $1",
       [phone_number]
@@ -34,14 +36,25 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "이미 등록된 전화번호입니다." });
     }
 
-    // 사용자 추가 (password는 임시로 birth 사용, 실제로는 별도 입력 필요)
-    const result = await pool.query(
-      "INSERT INTO users.accounts (name, phone_number, password, birthdate, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name",
-      [name, phone_number, birth, birth, 'customer'] // 여기서 birth를 password로 임시 사용
+    // 2️⃣ 사용자 추가 (password는 임시로 birth 사용)
+    const accountResult = await pool.query(
+      "INSERT INTO users.accounts (name, phone_number, password, birthdate, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, role",
+      [name, phone_number, birth, birth, 'customer'] // 'customer'로 등록
     );
-    res.status(201).json({ message: "회원가입 성공", user: result.rows[0] });
+
+    const newAccount = accountResult.rows[0];
+
+    // 3️⃣ 고객(customer)일 경우 users.members에도 추가
+    if (newAccount.role === "customer") {
+      await pool.query(
+        "INSERT INTO users.members (account_id, name, phone_number) VALUES ($1, $2, $3)",
+        [newAccount.id, name, phone_number]
+      );
+    }
+
+    res.status(201).json({ message: "회원가입 성공", user: newAccount });
   } catch (err) {
-    console.error("❌ 회원가입 오류:", err);
+    console.error("❌ 회원가입 오류:", err.message);
     res.status(500).send("Server Error");
   }
 });

@@ -41,20 +41,20 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  상품 재고 업데이트
-router.patch("/:id/stock", async (req, res) => {
-  const { id } = req.params;
-  const { quantity } = req.body; // 음수면 차감, 양수면 추가
+// ✅ 고객용 API: 특정 카테고리 상품만 가져오기
+router.get("/category/:categoryName", async (req, res) => {
+  const { categoryName } = req.params; // URL에서 categoryName 추출
 
   try {
     const result = await pool.query(
-      "UPDATE shops.products SET stock = stock + $1 WHERE id = $2 RETURNING *",
-      [quantity, id]
+      "SELECT * FROM shops.products WHERE category = $1 ORDER BY id DESC",
+      [categoryName]
     );
-    res.json(result.rows[0]);
+
+    res.json(result.rows);
   } catch (err) {
-    console.error("❌ 재고 업데이트 오류:", err);
-    res.status(500).json({ message: "재고 업데이트 실패" });
+    console.error("❌ 카테고리별 상품 조회 오류:", err);
+    res.status(500).json({ message: "상품 조회 실패" });
   }
 });
 
