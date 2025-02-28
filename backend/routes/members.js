@@ -151,7 +151,7 @@ router.get("/mypage/:account_id", async (req, res) => {
   const { account_id } = req.params;
 
   try {
-    // 🔹 1. account_id를 이용하여 해당 회원 정보 가져오기
+    // 🔹 1️⃣ account_id를 이용하여 해당 회원 정보 가져오기
     const memberResult = await pool.query(
       `SELECT m.id, m.account_id, m.name, m.phone_number, m.points
        FROM users.members m
@@ -165,9 +165,10 @@ router.get("/mypage/:account_id", async (req, res) => {
 
     const member = memberResult.rows[0];
 
-    // 🔹 2. 해당 회원의 결제 내역 가져오기
+    // 🔹 2️⃣ 해당 회원의 결제 내역 가져오기 (earned_points 추가)
     const transactionsResult = await pool.query(
       `SELECT s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
+              ROUND(s.final_amount * 0.1) AS earned_points,  -- 🔥 적립된 포인트 계산
               json_agg(json_build_object(
                 'product_id', sd.product_id,
                 'name', p.name,
