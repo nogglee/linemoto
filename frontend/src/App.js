@@ -13,6 +13,7 @@ import Header from "./pages/common/Header";
 import POS from "./pages/admin/POS";
 import ProductManagement from "./pages/admin/ProductManagement";
 import Signup from "./pages/customer/Signup"; 
+import MyPage from "./pages/customer/MyPage"; 
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -50,6 +51,8 @@ function App() {
         
         <Route path="/signup" element={<Signup />} /> 
         
+        {/* ✅ 추가: 결제 후 이동할 마이페이지 */}
+        <Route path="/mypage" element={<MyPage user={user} />} />
 
         {/* ✅ 관리자 레이아웃 */}
         <Route path="/admin/*" element={user?.role === "admin" ? <AdminLayout user={user} setUser={setUser} /> : <Navigate to="/" />}>

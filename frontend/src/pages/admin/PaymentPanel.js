@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchMemberInfo, fetchMembers, updateMemberPoints } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
+import { toast } from "react-toastify";
 
 const PaymentPanel = ({
   cartItems = [],
@@ -14,13 +15,17 @@ const PaymentPanel = ({
   setUsedPoints,
   handleSelectMember,
   handlePointChange,
-  handlePayment,
+  // handlePayment,
 }) => {
   const [memberPoints, setMemberPoints] = useState(0);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [members, setMembers] = useState([]);
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const maxUsablePoints = Math.min(selectedMember?.points || 0, totalAmount); // 최대 사용 가능 포인트 (보유 포인트와 상품 총액 중 작은 값)
+  const maxUsablePoints = Math.min(selectedMember?.points || 0, totalAmount); // 최대 사용 가능 
+  // 포인트 (보유 포인트와 상품 총액 중 작은 값)
+  const finalAmount = totalAmount - usedPoints; // ✅ 실제 결제 금액
+  const earnedPoints = Math.floor(finalAmount * 0.1); // ✅ 10% 적립 (소수점 제거)
+
 
 
   // ✅ 회원 선택 시 포인트 사용 초기화
@@ -62,6 +67,38 @@ const PaymentPanel = ({
   const onSelectMember = async (member) => {
     setSelectedMember(member);
     setIsMemberModalOpen(false);
+  };
+
+  const handlePayment = async (paymentMethod) => {
+    if (!selectedMember) {
+      alert("회원을 선택하세요.");
+      return;
+    }
+  
+    const transactionData = {
+      admin_id: 1, // 관리자 ID (임시)
+      customer_id: selectedMember.id,
+      total_amount: totalAmount,
+      discount: usedPoints,
+      final_amount: totalAmount - usedPoints,
+      payment_method: paymentMethod,
+      items: cartItems.map((item) => ({
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    };
+  
+    const response = await submitTransaction(transactionData);
+    if (response) {
+      // ✅ 관리자 페이지에서는 결제 완료 후 토스트만 표시하고 끝냄
+      toast.success("✅ 결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
+
+      // ✅ UI 초기화
+      setCartItems([]);
+      setUsedPoints(0);
+      setSelectedMember(null);
+    }
   };
 
   return (
@@ -173,15 +210,20 @@ const PaymentPanel = ({
         )}
       </div>
 
+      {/* ✅ 적립 예정 포인트 */}
+      <div className="mb-4 text-right text-gray-700">
+        적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
+      </div>
+
       {/* ✅ 결제 버튼 */}
       <button
         className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
         onClick={() => handlePayment("카드")}
         disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
       >
-        {`${(totalAmount - usedPoints).toLocaleString()}원 결제`}
+        {`${finalAmount.toLocaleString()}원 결제`}
         <span className="bg-white text-black px-2 py-1 rounded-full text-sm">
-          {totalQuantity}
+          {cartItems.length}
         </span>
       </button>
 
