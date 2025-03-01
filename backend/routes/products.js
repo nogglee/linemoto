@@ -134,4 +134,41 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     }
   });
 
+  // 상품 재고 업데이트 API
+// quantity에 음수 값을 보내면 해당 수량만큼 차감, 양수면 추가
+router.patch("/:id/stock", async (req, res) => {
+  const { id } = req.params;
+  const { quantity } = req.body; // 예: -2 (재고 차감)
+
+  console.log(`🔹 [재고 업데이트 요청] 상품 ID: ${id}, 요청된 변경 수량: ${quantity}`);
+
+  try {
+    // ✅ 현재 재고 확인
+    const stockResult = await pool.query("SELECT stock FROM shops.products WHERE id = $1", [id]);
+    if (stockResult.rows.length === 0) {
+      console.log("❌ 상품을 찾을 수 없음");
+      return res.status(404).json({ message: "상품을 찾을 수 없습니다." });
+    }
+
+    const currentStock = stockResult.rows[0].stock;
+    if (currentStock + quantity < 0) {
+      console.log(`❌ [재고 부족] 현재 수량: ${currentStock}, 요청 수량: ${quantity}`);
+      return res.status(400).json({ message: "재고가 부족합니다." });
+    }
+
+    // ✅ 재고 업데이트 실행
+    const result = await pool.query(
+      "UPDATE shops.products SET stock = stock + $1 WHERE id = $2 RETURNING *",
+      [quantity, id]
+    );
+
+    console.log(`✅ [DB 업데이트 완료] 상품 ID: ${id}, 차감 수량: ${quantity}, 변경 후 재고: ${result.rows[0].stock}`);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ [재고 업데이트 오류]:", err.message);
+    res.status(500).json({ message: "재고 업데이트 실패", error: err.message });
+  }
+});
+
+
 module.exports = router;

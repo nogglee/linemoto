@@ -4,6 +4,7 @@ const pool = require("../db");
 
 // ✅ 결제 처리 API
 router.post("/", async (req, res) => {
+  console.log("📌 서버에서 받은 데이터:", req.body); // ✅ 확인용 로그 추가
   const client = await pool.connect();
 
   try {
@@ -16,7 +17,7 @@ router.post("/", async (req, res) => {
       total_amount, 
       discount, 
       adjustment = 0, // ✅ 추가/차감 금액 (기본값 0)
-      adjustment_reason = "", // ✅ 조정 사유 (기본값 "")
+      adjustment_reason = adjustment_reason ? adjustment_reason.trim() : "", // ✅ 조정 사유 (기본값 "")
       final_amount, 
       earned_points,
       payment_method, 
@@ -30,12 +31,13 @@ router.post("/", async (req, res) => {
 
     // ✅ `adjustment` 값을 숫자로 변환하여 저장
     const numericAdjustment = parseFloat(adjustment) || 0;
+    console.log("🚀 변환된 adjustment 값:", numericAdjustment, typeof numericAdjustment);
 
-    // ✅ 1️⃣ 거래 내역 저장 (`sales`)
+
     const saleResult = await client.query(
       `INSERT INTO transactions.sales 
-       (admin_id, admin_name, customer_id, total_amount, discount, adjustment, adjustment_reason, final_amount, payment_method, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP) RETURNING id`,
+      (admin_id, admin_name, customer_id, total_amount, discount, adjustment, adjustment_reason, final_amount, payment_method, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP) RETURNING id`,
       [admin_id, admin_name, customer_id, total_amount, discount, numericAdjustment, adjustment_reason, final_amount, payment_method]
     );
 
