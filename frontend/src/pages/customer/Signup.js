@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { signupUser } from "../../api/auth";
 
-const SignupForm = () => { // onSignup prop 제거
+const SignupForm = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -11,6 +11,7 @@ const SignupForm = () => { // onSignup prop 제거
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
   const [isChecked, setIsChecked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ 중복 클릭 방지 상태 추가
 
   const handlePhoneChange = (e) => {
     const onlyNums = e.target.value.replace(/\D/g, "");
@@ -26,22 +27,50 @@ const SignupForm = () => { // onSignup prop 제거
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!name) return toast.error("이름을 입력해 주세요!");
-    if (!phone) return toast.error("휴대폰번호를 입력해 주세요!");
-    if (!year || !month || !day) return toast.error("생년월일을 입력해 주세요!");
-    if (!isChecked) return toast.error("개인정보 동의에 체크해 주세요!");
-
+  
+    if (isSubmitting) return; // ✅ 이미 제출 중이면 중복 클릭 방지
+    setIsSubmitting(true); // ✅ 버튼 클릭 즉시 비활성화
+  
+    if (!name) {
+      toast.error("이름을 입력해 주세요!");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!phone) {
+      toast.error("휴대폰번호를 입력해 주세요!");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!year || !month || !day) {
+      toast.error("생년월일을 입력해 주세요!");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!isChecked) {
+      toast.error("개인정보 동의에 체크해 주세요!");
+      setIsSubmitting(false);
+      return;
+    }
+  
     const userData = { name, phone, birth: getBirthValue() };
-    console.log("회원가입 데이터:", userData);
+  console.log("📌 회원가입 요청 데이터:", userData);
 
-    try {
-      await signupUser(userData); // 백엔드와 통신
-      toast.success("회원가입이 완료되었습니다!", { position: "top-center", autoClose: 2000 });
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (error) {
+  try {
+    await signupUser(userData);
+    toast.success("회원가입이 완료되었습니다!", { position: "top-center", autoClose: 2000 });
+    setTimeout(() => navigate("/login"), 2000);
+  } catch (error) {
+    console.error("❌ 회원가입 오류:", error.response?.data?.message || error.message);
+    
+    // ✅ 중복된 번호일 경우
+    if (error.response?.status === 400 && error.response.data.message === "이미 등록된 번호입니다.") {
+      toast.error("이미 가입된 휴대폰 번호입니다. 다른 번호를 사용해 주세요.");
+    } else {
       toast.error("회원가입에 실패했습니다. 다시 시도해 주세요.");
     }
+
+    setIsSubmitting(false);
+  }
   };
 
   return (
@@ -106,20 +135,18 @@ const SignupForm = () => { // onSignup prop 제거
           onChange={(e) => setIsChecked(e.target.checked)}
           className="w-5 h-5 accent-blue-500"
         />
-        <span className="text-sm text-gray-700">
-          개인정보 수집 및 이용에 동의합니다.
-        </span>
+        <span className="text-sm text-gray-700">개인정보 수집 및 이용에 동의합니다.</span>
       </label>
 
-      {/* 회원가입 버튼 (체크 안 하면 비활성화) */}
+      {/* 회원가입 버튼 */}
       <button
-        className={`px-4 py-2 rounded-md text-white ${
-          isChecked ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-300 cursor-not-allowed"
-        }`}
-        disabled={!isChecked}
-      >
-        회원가입
-      </button>
+  className={`px-4 py-2 rounded-md text-white ${
+    isChecked && !isSubmitting ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-300 cursor-not-allowed"
+  }`}
+  disabled={!isChecked || isSubmitting} // ✅ isSubmitting이 true면 비활성화
+>
+  {isSubmitting ? "처리 중..." : "회원가입"}
+</button>
     </form>
   );
 };

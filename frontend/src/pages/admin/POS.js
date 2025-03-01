@@ -155,41 +155,27 @@ const POS = (user) => {
           className="grid gap-4 w-full"
           style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}
         >
-          {/* {products
-            .filter((product) =>
-              selectedCategory === "기타" ? product.category === "기타" : product.category === selectedCategory
-            )
-            .map((product) => (
-              <button
-                key={product.id}
-                className="border p-4 rounded-xl shadow flex flex-col justify-between items-start w-[140px] md:w-[160px] lg-[200px] aspect-square bg-white"
-                onClick={() => addToCart(product)}
-              >
-                <h3 className="text-gray-950 text-lg font-semibold text-left">{product.name}</h3>
-                <p className="text-gray-900 font-regular text-lg">{product.price.toLocaleString()} 원</p>
-              </button>
-            ))} */}
             {products
-  .filter((product) =>
-    selectedCategory === "기타" ? product.category === "기타" : product.category === selectedCategory
-  )
-  .map((product) => (
-    <button
-      key={product.id}
-      disabled={product.stock === 0}
-      className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start w-[140px] md:w-[160px] lg:w-[200px] aspect-square ${
-        product.stock === 0 ? "bg-gray-500 text-white opacity-50 cursor-not-allowed" : "bg-white"
-      }`}
-      onClick={() => addToCart(product)}
-    >
-      <h3 className="text-lg font-semibold text-left">{product.name}</h3>
-      {product.stock === 0 ? (
-        <p className="font-bold">품절</p>
-      ) : (
-        <p className="text-lg">{product.price.toLocaleString()} 원</p>
-      )}
-    </button>
-  ))}
+              .filter((product) =>
+                selectedCategory === "기타" ? product.category === "기타" : product.category === selectedCategory
+              )
+              .map((product) => (
+                <button
+                  key={product.id}
+                  disabled={product.stock === 0}
+                  className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start w-[140px] md:w-[160px] lg:w-[200px] aspect-square ${
+                    product.stock === 0 ? "bg-gray-500 text-white opacity-50 cursor-not-allowed" : "bg-white"
+                  }`}
+                  onClick={() => addToCart(product)}
+                >
+                  <h3 className="text-lg font-semibold text-left">{product.name}</h3>
+                  {product.stock === 0 ? (
+                    <p className="font-bold">품절</p>
+                  ) : (
+                    <p className="text-lg">{product.price.toLocaleString()} 원</p>
+                  )}
+                </button>
+              ))}
         </div>
       </div>
 
