@@ -15,6 +15,7 @@ import ProductManagement from "./pages/admin/ProductManagement";
 import Signup from "./pages/customer/Signup"; 
 import MyPage from "./pages/customer/MyPage"; 
 import SalesManagement from "./pages/admin/SalesManagement";
+import { getProducts } from "./api/products";
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -31,6 +32,26 @@ function App() {
       localStorage.removeItem("user"); // 로그아웃 시 제거
     }
   }, [user]);
+
+  const [stock, setStock] = useState([]);
+
+  // ✅ 상품 재고 불러오기 (초기 로딩 시)
+  useEffect(() => {
+    const fetchStock = async () => {
+      try {
+        const products = await getProducts();
+        setStock(products.map(product => ({
+          id: product.id,
+          name: product.name,
+          stock: product.stock, // ✅ 재고 정보 추가
+        })));
+      } catch (error) {
+        console.error("❌ 상품 재고 불러오기 실패:", error);
+      }
+    };
+
+    fetchStock();
+  }, []);
 
   return (
     <Router>
@@ -58,8 +79,8 @@ function App() {
         {/* ✅ 관리자 레이아웃 */}
         <Route path="/admin/*" element={user?.role === "admin" ? <AdminLayout user={user} setUser={setUser} /> : <Navigate to="/" />}>
           <Route index element={<Navigate to="/admin/pos" replace />} />  {/* ✅ 기본값: POS */}
-          <Route path="pos" element={<POS />} />
-          <Route path="products" element={<ProductManagement />} />
+          <Route path="pos" element={<POS stock={stock} setStock={setStock} />} />
+          <Route path="products" element={<ProductManagement stock={stock} setStock={setStock} />} />
           <Route path="sales" element={<SalesManagement admin={user} />} />
         </Route>
 

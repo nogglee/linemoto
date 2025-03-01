@@ -1,6 +1,7 @@
 import apiClient from "./index";
 import { getSupabaseClient } from "./supabase";
 
+
 export const addProduct = async ({ name, price, stock, category, image_url }) => {
   try {
     const response = await apiClient.post("/products", {
@@ -134,4 +135,20 @@ export const uploadImage = async (file) => {
   // 업로드된 이미지 URL 가져오기
   const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/product-images/${sanitizedFileName}`;
   return imageUrl;
+};
+
+
+export const updateProductStock = async (productId, quantityChange) => {
+  console.log(`📌 [updateProductStock 호출됨] 상품 ID: ${productId}, 변경 수량: ${quantityChange}`);
+  try {
+    await apiClient.query(
+      `UPDATE shops.products
+       SET stock = stock - $1
+       WHERE id = $2`,
+      [quantityChange, productId]
+    );
+    console.log(`✅ 상품 ID: ${productId}, 재고 ${quantityChange} 차감 성공`);
+  } catch (error) {
+    console.error(`❌ 재고 차감 실패:`, error);
+  }
 };

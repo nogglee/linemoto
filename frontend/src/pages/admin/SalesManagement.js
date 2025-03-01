@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { fetchAdminSales } from "../../api/transactions";
 import { useNavigate } from "react-router-dom";
+import SalesLog from "./SalesLog";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const SalesManagement = ({ admin }) => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 집계 데이터 상태
+  const [salesByPayment, setSalesByPayment] = useState({});
+  const [salesByDate, setSalesByDate] = useState({});
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +29,63 @@ const SalesManagement = ({ admin }) => {
       setLoading(true);
       const data = await fetchAdminSales(admin.id);
       setSales(data);
+
+      // 집계 데이터 계산
+      const byPayment = {};
+      const productMap = {};
+      
+      // 날짜별 집계: 오늘, 이번 주, 이번 달, 이번 년도 (KST 기준)
+      let todaySum = 0,
+          weekSum = 0,
+          monthSum = 0,
+          yearSum = 0;
+      const now = dayjs().tz("Asia/Seoul");
+      const startOfToday = now.startOf("day");
+      const startOfWeek = now.startOf("week");
+      const startOfMonth = now.startOf("month");
+      const startOfYear = now.startOf("year");
+
+      data.forEach((sale) => {
+        // 결제수단별 집계
+        const pm = sale.payment_method || "기타";
+        byPayment[pm] = (byPayment[pm] || 0) + parseFloat(sale.final_amount);
+
+        // 날짜별 집계
+        const saleDate = dayjs.utc(sale.created_at).tz("Asia/Seoul");
+        const finalAmt = parseFloat(sale.final_amount);
+        if (saleDate.isSame(startOfToday, "day")) {
+          todaySum += finalAmt;
+        }
+        if (saleDate.isAfter(startOfWeek)) {
+          weekSum += finalAmt;
+        }
+        if (saleDate.isAfter(startOfMonth)) {
+          monthSum += finalAmt;
+        }
+        if (saleDate.isAfter(startOfYear)) {
+          yearSum += finalAmt;
+        }
+
+        // 판매량 높은 상품 집계 (상품명 기준)
+        sale.items.forEach((item) => {
+          productMap[item.name] = (productMap[item.name] || 0) + item.quantity;
+        });
+      });
+
+      setSalesByPayment(byPayment);
+      setSalesByDate({
+        "오늘": todaySum,
+        "이번 주": weekSum,
+        "이번 달": monthSum,
+        "이번 년도": yearSum,
+      });
+
+      const topProducts = Object.entries(productMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, quantity]) => ({ name, quantity }));
+      setTopSellingProducts(topProducts);
+
       setLoading(false);
     };
 
@@ -30,95 +99,54 @@ const SalesManagement = ({ admin }) => {
   };
 
   return (
-    <div className="p-6 px-4 md:px-[160px] lg:px-[200px]">
-      <h2 className="text-2xl font-bold mb-6">매출 관리</h2>
+    <div className="p-6">
+      <div className="font-600 text-2xl">매출 관리</div>
       {loading ? (
         <p>로딩 중...</p>
-      ) : sales.length === 0 ? (
-        <p className="text-gray-500">결제 내역이 없습니다.</p>
       ) : (
-        sales.map((sale) => {
-          // DB에서 문자열로 전달되는 경우를 대비하여 숫자로 변환
-          const adjustment = sale.adjustment ? parseFloat(sale.adjustment) : 0;
-          const adjustmentReason = sale.adjustment_reason ? sale.adjustment_reason.trim() : "";
-          const discountValue = sale.discount ? parseFloat(sale.discount) : 0;
-          const earnedPoints = sale.earned_points ? parseFloat(sale.earned_points) : 0;
-          
-          return (
-            <div key={sale.id} className="bg-white p-4 rounded-lg shadow mb-4">
-              <h3 className="text-lg font-semibold">{sale.customer_name}님의 결제</h3>
-              <p className="text-sm text-gray-500">{convertToKST(sale.created_at)}</p>
-              <ul className="mt-2">
-                {sale.items.map((item) => (
-                  <li key={item.product_id} className="flex justify-between">
-                    <span>{item.name} x {item.quantity}</span>
-                    <span>{((item.price ?? 0) * (item.quantity ?? 1)).toLocaleString()}원</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3">
-                <p>
-                  총 결제 금액:{" "}
-                  <span className="font-bold">
-                    {Math.floor(sale.final_amount ?? 0).toLocaleString()}원
-                  </span>
+        <div className="flex flex-col md:flex-row">
+          {/* 왼쪽 컬럼: 집계 정보 */}
+          <div className="md:w-2/3 md:pr-4">
+            {/* 결제수단별 매출 정보 */}
+            <div className="mb-6 bg-white p-4 rounded-lg shadow">
+              <h2 className="text-2xl font-bold mb-2">결제수단별 매출</h2>
+              {Object.entries(salesByPayment).map(([method, total]) => (
+                <p key={method}>
+                  {method}: {Math.floor(total).toLocaleString()}원
                 </p>
-                {/* 항상 사용 포인트 출력 */}
-                <p>
-                  사용 포인트:{" "}
-                  <span className="text-red-500">
-                    {Math.floor(discountValue).toLocaleString()}p
-                  </span>
-                </p>
-                <p>
-                  적립 포인트:{" "}
-                  <span className="text-green-500">
-                    {Math.floor(earnedPoints).toLocaleString()}p
-                  </span>
-                </p>
-                <p>
-                  결제 수단:{" "}
-                  <span className="text-gray-600">
-                    {sale.payment_method || "정보 없음"}
-                  </span>
-                </p>
-                <p className="text-gray-500 text-sm">
-                  {convertToKST(sale.created_at)}
-                </p>
-                <p>
-                  관리자:{" "}
-                  <span className="text-gray-700 font-semibold">
-                    {sale.admin_name || "없음"}
-                  </span>
-                </p>
-                {/* 조정 금액 및 조정 사유는, 값이 0이어도 조정 사유가 있으면 출력 */}
-                {(adjustment !== 0 || adjustmentReason) && (
-                  <div className="mt-3 p-3 border rounded-lg bg-gray-100">
-                    {adjustment > 0 ? (
-                      <span className="font-bold text-green-600">
-                        🔺 추가 금액: {Math.floor(adjustment).toLocaleString()}원
-                      </span>
-                    ) : adjustment < 0 ? (
-                      <span className="font-bold text-red-600">
-                        🔻 할인 금액: {Math.floor(Math.abs(adjustment)).toLocaleString()}원
-                      </span>
-                    ) : (
-                      // adjustment === 0 && adjustmentReason exists
-                      <span className="font-bold text-gray-600">
-                        조정 금액: 0원
-                      </span>
-                    )}
-                    {adjustmentReason && (
-                      <p className="text-gray-600 text-sm mt-1">
-                        사유: {adjustmentReason}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
-          );
-        })
+            
+            {/* 날짜별 매출 정보 */}
+            <div className="mb-6 bg-white p-4 rounded-lg shadow">
+              <h2 className="text-2xl font-bold mb-2">날짜별 매출</h2>
+              {Object.entries(salesByDate).map(([period, total]) => (
+                <p key={period}>
+                  {period}: {Math.floor(total).toLocaleString()}원
+                </p>
+              ))}
+              {/* 추후 날짜 지정 조회 기능 추가 예정 */}
+            </div>
+            
+            {/* 판매량 높은 상품 랭킹 */}
+            <div className="mb-6 bg-white p-4 rounded-lg shadow">
+              <h2 className="text-2xl font-bold mb-2">판매량 높은 상품 랭킹</h2>
+              {topSellingProducts.map((prod, idx) => (
+                <p key={idx}>
+                  {idx + 1}. {prod.name}: {prod.quantity}개
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* 오른쪽 컬럼: 상세 결제 내역 (SalesLog) */}
+          <div className="md:w-1/3">
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h2 className="text-2xl font-bold mb-4">상세 결제 내역</h2>
+              <SalesLog sales={sales} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

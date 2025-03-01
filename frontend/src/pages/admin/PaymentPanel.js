@@ -5,6 +5,7 @@ import { submitTransaction } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
 import { toast } from "react-toastify";
 
+
 const PaymentPanel = ({
   cartItems = [],
   setCartItems,
@@ -92,6 +93,7 @@ const PaymentPanel = ({
       alert("회원을 선택하세요.");
       return;
     }
+    console.log("🛠 현재 조정 금액 (adjustmentAmount):", adjustmentAmount)
   
     const transactionData = {
       admin_id: admin.id, // ✅ 관리자 ID
@@ -110,6 +112,10 @@ const PaymentPanel = ({
         price: item.price,
       })),
     };
+    console.log("🚀 프론트에서 보낼 transactionData:", transactionData);  // ✅ 최종 데이터 확인
+
+
+  
   
     const response = await submitTransaction(transactionData);
     if (response) {
@@ -369,7 +375,12 @@ const PaymentPanel = ({
       {/* ✅ 결제 버튼 */}
       <button
         className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
-        onClick={() => handlePayment(paymentMethod)}
+        onClick={() => {
+          console.log("🛠 결제 버튼 클릭됨!");
+          console.log("🛠 handlePayment props 값:", handlePayment);
+          console.log("🔍 현재 관리자 정보(admin):", admin);          
+          handlePayment(paymentMethod)
+        }}
         disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
       >
         {`${finalAmount.toLocaleString()}원 결제`}
