@@ -19,13 +19,14 @@ router.post("/", async (req, res) => {
       adjustment = 0, // ✅ 추가/차감 금액 (기본값 0)
       adjustment_reason = adjustment_reason ? adjustment_reason.trim() : "", // ✅ 조정 사유 (기본값 "")
       final_amount, 
-      earned_points,
       payment_method, 
       items 
     } = req.body;
 
     const calculatedEarnedPoints = final_amount >= 10000 ? Math.floor(final_amount * 0.05) : 0;
-    if (earned_points !== calculatedEarnedPoints) {
+    const earned_points = customer_id ? calculatedEarnedPoints : 0;
+    
+    if (customer_id && earned_points !== calculatedEarnedPoints) {
       throw new Error("Earned points mismatch");
     }
 
@@ -95,7 +96,7 @@ router.get("/sales/:admin_id", async (req, res) => {
         s.payment_method, 
         s.created_at,
         s.admin_name,
-        a.name AS customer_name,
+        COALESCE(a.name, '비회원') AS customer_name,
         ROUND(s.final_amount * 0.05) AS earned_points,
         s.adjustment,
         s.adjustment_reason,
@@ -106,7 +107,7 @@ router.get("/sales/:admin_id", async (req, res) => {
           'price', sd.price
         )) AS items
       FROM transactions.sales s
-      JOIN users.accounts a ON s.customer_id = a.id
+      LEFT JOIN users.accounts a ON s.customer_id = a.id
       JOIN transactions.sales_details sd ON s.id = sd.sale_id
       JOIN shops.products p ON sd.product_id = p.id
       WHERE s.admin_id = $1  -- 여기서 현재 로그인한 관리자의 id 사용
@@ -116,6 +117,7 @@ router.get("/sales/:admin_id", async (req, res) => {
       ORDER BY s.created_at DESC;`,
       [admin_id]
     );
+    console.log("📌 received earned_points:", result.rows.map(row => row.earned_points));
 
     res.json(result.rows);
   } catch (err) {
