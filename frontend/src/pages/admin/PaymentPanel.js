@@ -42,7 +42,7 @@ const PaymentPanel = ({
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const maxUsablePoints = Math.min(selectedMember?.points || 0, finalAmountBeforePoints); // 최대 사용 가능 
-  const earnedPoints = finalAmount >= 10000 ? Math.floor(finalAmount * 0.1) : 0;
+  const earnedPoints = finalAmount >= 10000 ? Math.floor(finalAmount * 0.05) : 0;
 
   // ✅ 회원 선택 시 포인트 사용 초기화
   useEffect(() => {
