@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
       items 
     } = req.body;
 
-    const calculatedEarnedPoints = final_amount >= 10000 ? Math.floor(final_amount * 0.1) : 0;
+    const calculatedEarnedPoints = final_amount >= 10000 ? Math.floor(final_amount * 0.05) : 0;
     if (earned_points !== calculatedEarnedPoints) {
       throw new Error("Earned points mismatch");
     }
@@ -96,7 +96,7 @@ router.get("/sales/:admin_id", async (req, res) => {
         s.created_at,
         s.admin_name,
         a.name AS customer_name,
-        ROUND(s.final_amount * 0.1) AS earned_points,
+        ROUND(s.final_amount * 0.05) AS earned_points,
         s.adjustment,
         s.adjustment_reason,
         json_agg(json_build_object(

@@ -82,7 +82,7 @@ router.get("/:id/transactions", async (req, res) => {
     const result = await pool.query(
       `SELECT s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
               COALESCE(json_agg(sd) FILTER (WHERE sd.id IS NOT NULL), '[]') AS items,
-              FLOOR(s.final_amount * 0.1) AS earned_points
+              FLOOR(s.final_amount * 0.05) AS earned_points
        FROM transactions.sales s
        LEFT JOIN transactions.sales_details sd ON s.id = sd.sale_id
        WHERE s.customer_id = $1
@@ -168,7 +168,7 @@ router.get("/mypage/:account_id", async (req, res) => {
     // 🔹 2️⃣ 해당 회원의 결제 내역 가져오기 (earned_points & adjustment 추가!)
     const transactionsResult = await pool.query(
       `SELECT s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
-              ROUND(s.final_amount * 0.1) AS earned_points, s.admin_id, s.admin_name, -- 🔥 적립된 포인트 계산
+              ROUND(s.final_amount * 0.05) AS earned_points, s.admin_id, s.admin_name, -- 🔥 적립된 포인트 계산
               s.adjustment,  -- ✅ 추가
               s.adjustment_reason,  -- ✅ 추가
               json_agg(json_build_object(
