@@ -14,10 +14,13 @@ const MyPage = ({ user }) => {
       return;
     }
 
+    console.log("🚀 MyPage 데이터 요청 시작 - user.id:", user.id);
+
     // ✅ 회원 정보 및 결제 내역 불러오기
     const loadMyPageData = async () => {
       setLoading(true);
       const data = await fetchMyPageData(user.id);
+      console.log("🔥 fetchMyPageData 응답:", data);
       if (data) {
         setMember(data.member);
         setTransactions(data.transactions);
@@ -80,10 +83,10 @@ const MyPage = ({ user }) => {
                           {adjustment > 0 ? "🔺 추가 금액" : "🔻 할인 금액"}:{" "}
                           {Math.floor(adjustment).toLocaleString()}원
                         </span>
-                        {/* {adjustmentReason && (
+                        {adjustmentReason && (
                           <p className="text-gray-600 text-sm mt-1">사유: {adjustmentReason}</p>
                         )}
-                        <p>관리자: <span className="text-gray-700">{txn.admin_name || "없음"}</span></p> */}
+                        {/* <p>관리자: <span className="text-gray-700">{txn.admin_name || "없음"}</span></p> */}
                       </div>
                     )}
                   </div>

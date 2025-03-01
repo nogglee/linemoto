@@ -5,7 +5,6 @@ import { submitTransaction } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
 import { toast } from "react-toastify";
 
-
 const PaymentPanel = ({
   cartItems = [],
   setCartItems,
@@ -20,23 +19,19 @@ const PaymentPanel = ({
 }) => {
   const { user: admin } = useOutletContext();
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
-  const [members, setMembers] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("카드"); 
-  const [adjustmentOpen, setAdjustmentOpen] = useState(false); // ✅ 조정 UI 토글 상태
-  const [adjustmentType, setAdjustmentType] = useState("discount"); // ✅ 'discount' 또는 'addition'
-  const [adjustmentAmount, setAdjustmentAmount] = useState(0); // ✅ 추가/차감 금액
-  const [adjustmentReason, setAdjustmentReason] = useState(""); // ✅ 사유 입력
+  const [adjustmentOpen, setAdjustmentOpen] = useState(false); 
+  const [adjustmentType, setAdjustmentType] = useState("discount");
+  const [adjustmentAmount, setAdjustmentAmount] = useState(0); 
+  const [adjustmentReason, setAdjustmentReason] = useState("");
   const [appliedAdjustment, setAppliedAdjustment] = useState(0);
-  // const [usedPoints, setUsedPoints] = useState(0);
-
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const maxDiscount = totalAmount; // ✅ 할인 최대 한도 = 상품 총 가격
-  const validDiscount = Math.min(usedPoints, maxDiscount);
+  const maxDiscount = totalAmount; // 할인 최대 한도 = 상품 총 가격
   
   const adjustedAmount = adjustmentType === "discount"
-    ? -Math.min(Math.abs(adjustmentAmount), maxDiscount) // ✅ 할인은 상품 가격을 넘을 수 없음
-    : Math.abs(adjustmentAmount); // ✅ 추가 금액은 제한 없음
+    ? -Math.min(Math.abs(adjustmentAmount), maxDiscount) // 할인은 상품 가격을 넘을 수 없음
+    : Math.abs(adjustmentAmount); // 추가 금액은 제한 없음
 
   const finalAmountBeforePoints = totalAmount + appliedAdjustment; // 조정 금액 반영 후 금액
   const finalAmount = Math.max(finalAmountBeforePoints - usedPoints, 0); // 포인트 사용 후 최소 0원
@@ -45,61 +40,62 @@ const PaymentPanel = ({
   const maxUsablePoints = Math.min(selectedMember?.points || 0, finalAmountBeforePoints); // 최대 사용 가능 
   const earnedPoints = selectedMember && finalAmount >= 10000 ? Math.floor(finalAmount * 0.05) : 0;
 
-  // ✅ 회원 선택 시 포인트 사용 초기화
+  // 회원 선택 시 포인트 사용 초기화
   useEffect(() => {
-    setUsedPoints(0); // 회원이 변경되면 포인트 사용 초기화
+    setUsedPoints(0);
   }, [selectedMember]);
 
-  // ✅ 회원 목록 불러오기
+  // 회원 목록 불러오기
   useEffect(() => {
     const loadMembers = async () => {
       try {
-        const memberList = await fetchMembers();
-        setMembers(memberList);
+        await fetchMembers();
       } catch (error) {
         console.error("Failed to load members:", error);
-        setMembers([]);
       }
     };
     loadMembers();
   }, []);
 
-  // 🛠 상품 삭제 핸들러
+  // 상품 삭제 핸들러
   const removeItem = (itemId) => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
   };
 
-  // 🛠 전체 삭제 핸들러
+  // 전체 삭제 핸들러
   const clearCart = () => {
     setCartItems([]);
   };
 
+  // 조정금액 적용 핸들러
   const applyAdjustment = () => {
     if (!adjustmentReason.trim()) {
-      alert("사유를 입력해주세요.");
+      alert("금액 변경에 대한 사유를 입력해주세요.");
       return;
     }
     setAppliedAdjustment(adjustedAmount);
     setAdjustmentOpen(false);
   };
 
+  // 조정금액 삭제 핸들러
   const removeAdjustment = () => {
     setAppliedAdjustment(0);
     setAdjustmentAmount(0);
     setAdjustmentReason("");
   };
 
+  // 결제 핸들러
   const handlePayment = async (paymentMethod) => {
   
     const transactionData = {
-      admin_id: admin.id, // ✅ 관리자 ID
-      admin_name: admin.name, // ✅ 관리자 이름 추가
+      admin_id: admin.id, 
+      admin_name: admin.name,
       customer_id: selectedMember ? selectedMember.account_id : null,
       total_amount: totalAmount,
       discount: usedPoints,
-      adjustment: adjustmentAmount ? adjustedAmount : 0, // ✅ 추가/차감 금액
-      adjustment_reason: adjustmentReason.trim(), // ✅ 조정 사유
-      final_amount: finalAmount, // ✅ 최종 결제 금액
+      adjustment: adjustmentAmount ? adjustedAmount : 0,
+      adjustment_reason: adjustmentReason.trim(),
+      final_amount: finalAmount,
       earned_points: selectedMember ? earnedPoints : 0,
       payment_method: paymentMethod,
       items: cartItems.map((item) => ({
@@ -108,17 +104,12 @@ const PaymentPanel = ({
         price: item.price,
       })),
     };
-    console.log("📌 earned_points:", earnedPoints);
-    console.log("🚀 프론트에서 보낼 transactionData:", transactionData);  // ✅ 최종 데이터 확인
 
-
-  
-  
     const response = await submitTransaction(transactionData);
     if (response) {
-      toast.success("✅ 결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
+      toast.success("결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
 
-      // ✅ UI 초기화
+      // UI 초기화
       setCartItems([]);
       setUsedPoints(0);
       setSelectedMember(null);
@@ -130,31 +121,29 @@ const PaymentPanel = ({
     }
   };
 
-  // ✅ 숫자를 0,000 형식으로 변환하는 함수
+  // 숫자를 0,000 형식으로 변환하는 함수
   const formatNumber = (value) => {
     if (!value) return ""; // 값이 없으면 빈 문자열 반환
     const num = parseInt(value.replace(/,/g, ""), 10); // 쉼표 제거 후 숫자로 변환
     return isNaN(num) ? "" : num.toLocaleString(); // 숫자가 아니면 빈 문자열 반환
   };
 
-  // ✅ 포인트 사용 입력 핸들러
+  // 포인트 사용 입력 핸들러
   const handlePointInputChange = (e) => {
     let value = e.target.value.replace(/,/g, ""); // 쉼표 제거
     value = value ? Math.min(parseInt(value, 10), maxUsablePoints) : 0; // 최대 사용 가능 포인트 초과 방지
     setUsedPoints(formatNumber(value.toString())); // 포맷 적용
   };
 
-  // ✅ 조정 금액 입력 핸들러
+  // 조정 금액 입력 핸들러
   const handleAdjustmentInputChange = (e) => {
     let value = e.target.value.replace(/,/g, ""); // ✅ 쉼표 제거
     value = value ? Math.abs(parseInt(value, 10)) : ""; // ✅ 음수 방지 (빈 값 허용)
     setAdjustmentAmount(value); // ✅ 상태는 숫자로 저장
   };
 
-
   return (
     <div className="w-[320px] bg-white p-6 border-l border-gray-200 overflow-auto">
-      {/* 🔹 전체 삭제 & 상품 개수 */}
       <div className="flex justify-between mb-4">
         <button className="text-red-500" onClick={clearCart}>
           전체삭제

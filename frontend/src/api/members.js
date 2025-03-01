@@ -41,7 +41,9 @@ export const updateMemberPoints = async (memberId, points, reason) => {
 
 // ✅ 회원의 거래 내역 조회 (추가)
 export const fetchMemberTransactions = async (memberId) => {
+  console.log("🔥 fetchMemberTransactions 함수 실행됨!", memberId);
   try {
+    console.log("🚀 요청 보냄: /members/" + memberId + "/transactions");
     const response = await apiClient.get(`/members/${memberId}/transactions`);
     console.log("fetchMemberTransactions response:", response.data);
     return response.data;
@@ -75,9 +77,18 @@ export const payArrears = async (memberId, paymentMethod) => {
 };
 
 export const fetchMyPageData = async (accountId) => {
+  console.log("🔥 fetchMyPageData 함수 실행됨!", accountId);
   try {
     const response = await apiClient.get(`/members/mypage/${accountId}`);
-    console.log("fetchMyPageData response:", response.data);
+    console.log("✅ fetchMyPageData 응답:", response.data); // ✅ 응답 확인
+    if (response.data.member) {
+      console.log("🛠 회원 정보:", response.data.member);
+    }
+
+    if (response.data.transactions) {
+      console.log("🚀 거래 내역 데이터 있음:", response.data.transactions);
+      console.log("🔥 fetchMemberTransactions 함수 실행됨!", accountId);
+    }
     return response.data;
   } catch (error) {
     console.error("❌ MyPage 데이터 불러오기 실패:", error.response?.data || error.message);
