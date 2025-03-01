@@ -10,8 +10,8 @@ const POS = (user) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [usedPoints, setUsedPoints] = useState(0);
-  const [categories, setCategories] = useState(["기타"]);
-  const [selectedCategory, setSelectedCategory] = useState("기타");
+  const [categories, setCategories] = useState(["ETC"]);
+  const [selectedCategory, setSelectedCategory] = useState("ETC");
 
   // 상품 목록 불러오기 및 카테고리 세팅
   useEffect(() => {
@@ -19,10 +19,9 @@ const POS = (user) => {
       const data = await getProducts();
       setProducts(data);
     
-      // 🔹 DB에서 가져온 카테고리만 사용 (기본값 추가 X)
       const uniqueCategories = [...new Set(data.map((product) => product.category))];
     
-      setCategories(uniqueCategories); // ✅ "기타" 기본 추가 X
+      setCategories(uniqueCategories);
     };
     fetchProducts();
   }, []);
@@ -99,7 +98,7 @@ const POS = (user) => {
         >
             {products
               .filter((product) =>
-                selectedCategory === "기타" ? product.category === "기타" : product.category === selectedCategory
+                selectedCategory === "ETC" ? product.category === "ETC" : product.category === selectedCategory
               )
               .map((product) => (
                 <button
