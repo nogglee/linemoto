@@ -73,6 +73,19 @@ router.post("/", async (req, res) => {
       [earned_points, customer_id]
     );
 
+    // ✅ 5️⃣ 상품 재고 차감 로직 추가
+    const updateStockPromises = items.map(item =>
+      client.query(
+        `UPDATE shops.products SET stock = stock - $1 WHERE id = $2`,
+        [item.quantity, item.product_id]
+      )
+    );
+
+    await Promise.all(updateStockPromises);
+    
+    console.log("✅ 상품 재고 차감 완료");
+
+
     await client.query("COMMIT"); // 🔹 두 번째 트랜잭션 완료
     res.json({ message: "결제 완료", saleId });
   } catch (err) {
