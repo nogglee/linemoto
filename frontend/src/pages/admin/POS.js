@@ -21,8 +21,11 @@ const POS = (user) => {
     const fetchProducts = async () => {
       const data = await getProducts();
       setProducts(data);
-      const uniqueCategories = ["기타", ...new Set(data.map((product) => product.category))];
-      setCategories(uniqueCategories);
+    
+      // 🔹 DB에서 가져온 카테고리만 사용 (기본값 추가 X)
+      const uniqueCategories = [...new Set(data.map((product) => product.category))];
+    
+      setCategories(uniqueCategories); // ✅ "기타" 기본 추가 X
     };
     fetchProducts();
   }, []);
@@ -76,60 +79,60 @@ const POS = (user) => {
     }
   };
 
-  const handlePayment = async (paymentMethod) => {
-    console.log("📌 handlePayment 호출됨 - 결제 수단:", paymentMethod);
-  console.log("📌 현재 선택된 상품:", selectedProducts);
-  console.log("📌 현재 선택된 회원:", selectedMember);
-  console.log("📌 관리자 정보:", user);
+  // const handlePayment = async (paymentMethod) => {
+  //   console.log("📌 handlePayment 호출됨 - 결제 수단:", paymentMethod);
+  // console.log("📌 현재 선택된 상품:", selectedProducts);
+  // console.log("📌 현재 선택된 회원:", selectedMember);
+  // console.log("📌 관리자 정보:", user);
 
 
-    if (!selectedProducts.length) {
-      console.warn("⚠️ 장바구니가 비어 있습니다. 결제 취소.");
-      return;
-    }
+  //   if (!selectedProducts.length) {
+  //     console.warn("⚠️ 장바구니가 비어 있습니다. 결제 취소.");
+  //     return;
+  //   }
   
 
-    const totalAmount = selectedProducts.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const finalAmount = Math.max(totalAmount - usedPoints, 0); // 할인 후 최소 0원 유지
+  //   const totalAmount = selectedProducts.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  //   const finalAmount = Math.max(totalAmount - usedPoints, 0); // 할인 후 최소 0원 유지
 
-    const transactionData = {
-      member_id: selectedMember?.id || null,
-      admin_id: 1, // 예제 값
-      total_amount: totalAmount,
-      discount: usedPoints,
-      final_amount: finalAmount,
-      payment_method: paymentMethod,
-      items: selectedProducts.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-    };
+  //   const transactionData = {
+  //     member_id: selectedMember?.id || null,
+  //     admin_id: 1, // 예제 값
+  //     total_amount: totalAmount,
+  //     discount: usedPoints,
+  //     final_amount: finalAmount,
+  //     payment_method: paymentMethod,
+  //     items: selectedProducts.map((item) => ({
+  //       product_id: item.id,
+  //       quantity: item.quantity,
+  //       price: item.price,
+  //     })),
+  //   };
   
-    console.log("🚀 서버로 전송할 결제 데이터:", transactionData);
+  //   console.log("🚀 서버로 전송할 결제 데이터:", transactionData);
 
-  const response = await submitTransaction(transactionData);
-  if (response) {
-    console.log("✅ 결제 성공! 상품 재고 차감 시작...");
+  // const response = await submitTransaction(transactionData);
+  // if (response) {
+  //   console.log("✅ 결제 성공! 상품 재고 차감 시작...");
 
-    selectedProducts.forEach(async (item) => {
-      try {
-        console.log(`🔹 [재고 차감 요청] 상품 ID: ${item.id}, 차감 수량: ${-item.quantity}`);
-        const updatedProduct = await updateProductStock(item.id, -item.quantity);
-        console.log(`✅ [재고 차감 완료] 업데이트된 상품:`, updatedProduct);
-      } catch (error) {
-        console.error(`❌ [재고 차감 실패] 상품 ID: ${item.id}`, error);
-      }
-    });
+  //   selectedProducts.forEach(async (item) => {
+  //     try {
+  //       console.log(`🔹 [재고 차감 요청] 상품 ID: ${item.id}, 차감 수량: ${-item.quantity}`);
+  //       const updatedProduct = await updateProductStock(item.id, -item.quantity);
+  //       console.log(`✅ [재고 차감 완료] 업데이트된 상품:`, updatedProduct);
+  //     } catch (error) {
+  //       console.error(`❌ [재고 차감 실패] 상품 ID: ${item.id}`, error);
+  //     }
+  //   });
 
-    alert("결제 완료!");
-    setSelectedProducts([]);
-    setUsedPoints(0);
-    setSelectedMember(null);
-  } else {
-    console.error("❌ 결제 실패: 서버 응답 없음");
-  }
-  };
+  //   alert("결제 완료!");
+  //   setSelectedProducts([]);
+  //   setUsedPoints(0);
+  //   setSelectedMember(null);
+  // } else {
+  //   console.error("❌ 결제 실패: 서버 응답 없음");
+  // }
+  // };
 
   return (
     <div className="flex h-full w-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] overflow-hidden font-body">
@@ -191,7 +194,7 @@ const POS = (user) => {
         setUsedPoints={setUsedPoints}
         handleSelectMember={handleSelectMember}
         handlePointChange={handlePointChange}
-        handlePayment={handlePayment}
+        // handlePayment={handlePayment}
         admin={user} 
       />
     </div>

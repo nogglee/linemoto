@@ -27,6 +27,7 @@ const PaymentPanel = ({
   const [adjustmentAmount, setAdjustmentAmount] = useState(0); // ✅ 추가/차감 금액
   const [adjustmentReason, setAdjustmentReason] = useState(""); // ✅ 사유 입력
   const [appliedAdjustment, setAppliedAdjustment] = useState(0);
+  // const [usedPoints, setUsedPoints] = useState(0);
 
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -42,7 +43,7 @@ const PaymentPanel = ({
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const maxUsablePoints = Math.min(selectedMember?.points || 0, finalAmountBeforePoints); // 최대 사용 가능 
-  const earnedPoints = finalAmount >= 10000 ? Math.floor(finalAmount * 0.05) : 0;
+  const earnedPoints = selectedMember && finalAmount >= 10000 ? Math.floor(finalAmount * 0.05) : 0;
 
   // ✅ 회원 선택 시 포인트 사용 초기화
   useEffect(() => {
@@ -89,22 +90,17 @@ const PaymentPanel = ({
   };
 
   const handlePayment = async (paymentMethod) => {
-    if (!selectedMember) {
-      alert("회원을 선택하세요.");
-      return;
-    }
-    console.log("🛠 현재 조정 금액 (adjustmentAmount):", adjustmentAmount)
   
     const transactionData = {
       admin_id: admin.id, // ✅ 관리자 ID
       admin_name: admin.name, // ✅ 관리자 이름 추가
-      customer_id: selectedMember.account_id,
+      customer_id: selectedMember ? selectedMember.account_id : null,
       total_amount: totalAmount,
       discount: usedPoints,
       adjustment: adjustmentAmount ? adjustedAmount : 0, // ✅ 추가/차감 금액
       adjustment_reason: adjustmentReason.trim(), // ✅ 조정 사유
       final_amount: finalAmount, // ✅ 최종 결제 금액
-      earned_points: earnedPoints,
+      earned_points: selectedMember ? earnedPoints : 0,
       payment_method: paymentMethod,
       items: cartItems.map((item) => ({
         product_id: item.id,
@@ -112,6 +108,7 @@ const PaymentPanel = ({
         price: item.price,
       })),
     };
+    console.log("📌 earned_points:", earnedPoints);
     console.log("🚀 프론트에서 보낼 transactionData:", transactionData);  // ✅ 최종 데이터 확인
 
 
@@ -340,14 +337,18 @@ const PaymentPanel = ({
       
 
       {/* ✅ 보유 포인트 */}
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-1">보유포인트</label>
-        <div className="text-gray-900 font-bold text-lg">
-          {selectedMember ? `${selectedMember.points.toLocaleString()}p` : "0p"}
+      {/* ✅ 회원이 선택된 경우에만 보유 포인트 표시 */}
+      {selectedMember && (
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">보유포인트</label>
+          <div className="text-gray-900 font-bold text-lg">
+            {selectedMember.points.toLocaleString()}p
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ✅ 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
+      {selectedMember && (
       <div className="mb-4">
         <label className="block text-gray-700 mb-1">포인트 사용</label>
         <input
@@ -366,11 +367,15 @@ const PaymentPanel = ({
           disabled={!selectedMember || selectedMember.points < 50000} // 5만 미만이면 비활성화
         />
       </div>
+      )}
 
       {/* ✅ 적립 예정 포인트 */}
-      <div className="mb-4 text-right text-gray-700">
-        적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
-      </div>
+      {/* ✅ 회원이 선택된 경우에만 예상 포인트 표시 */}
+      {selectedMember && (
+        <div className="mb-4 text-right text-gray-700">
+          적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
+        </div>
+      )}
 
       {/* ✅ 결제 버튼 */}
       <button
