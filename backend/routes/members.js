@@ -77,6 +77,7 @@ router.patch("/:id/points", async (req, res) => {
 // ✅ 특정 회원의 거래 내역 조회 API 추가
 router.get("/:id/transactions", async (req, res) => {
   const { id } = req.params;
+  console.log("📌 요청된 customer_id:", id); 
 
   try {
     const result = await pool.query(
@@ -90,6 +91,7 @@ router.get("/:id/transactions", async (req, res) => {
        ORDER BY s.created_at DESC`, // ✅ 최신순 정렬
       [id]
     );
+    console.log("📌 조회된 거래 내역:", result.rows); 
 
     res.json(result.rows);
   } catch (err) {
@@ -168,9 +170,8 @@ router.get("/mypage/:account_id", async (req, res) => {
     // 🔹 2️⃣ 해당 회원의 결제 내역 가져오기 (earned_points & adjustment 추가!)
     const transactionsResult = await pool.query(
       `SELECT s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
-              ROUND(s.final_amount * 0.05) AS earned_points, s.admin_id, s.admin_name, -- 🔥 적립된 포인트 계산
-              s.adjustment,  -- ✅ 추가
-              s.adjustment_reason,  -- ✅ 추가
+              ROUND(s.final_amount * 0.05) AS earned_points, s.admin_id, s.admin_name, 
+              s.adjustment, s.adjustment_reason,  
               json_agg(json_build_object(
                 'product_id', sd.product_id,
                 'name', p.name,
@@ -180,11 +181,12 @@ router.get("/mypage/:account_id", async (req, res) => {
        FROM transactions.sales s
        JOIN transactions.sales_details sd ON s.id = sd.sale_id
        JOIN shops.products p ON sd.product_id = p.id
-       WHERE s.customer_id = $1
+       WHERE s.customer_id = $1  -- 🔥 여기서 member.account_id 사용!
        GROUP BY s.id
        ORDER BY s.created_at DESC`,
-      [member.id]
+      [member.account_id] // ✅ member.id → member.account_id로 변경
     );
+    console.log("📌 조회된 거래 내역:", transactionsResult.rows); // 거래 내역 로그 추가
 
     res.json({ member, transactions: transactionsResult.rows });
   } catch (err) {
