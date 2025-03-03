@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { fetchMembers } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
@@ -29,6 +29,7 @@ const PaymentPanel = ({
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [appliedAdjustment, setAppliedAdjustment] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const adjustmentInputRef = useRef(null); 
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const maxDiscount = totalAmount; // 할인 최대 한도 = 상품 총 가격
@@ -48,6 +49,12 @@ const PaymentPanel = ({
   useEffect(() => {
     setUsedPoints(0);
   }, [selectedMember]);
+
+  useEffect(() => {
+    if (adjustmentOpen && adjustmentInputRef.current) {
+      adjustmentInputRef.current.focus(); // ✅ 조정 UI 열릴 때 input에 포커스
+    }
+  }, [adjustmentOpen]); // ✅ adjustmentOpen 상태가 변경될 때 실행
 
   // 회원 목록 불러오기
   useEffect(() => {
@@ -187,8 +194,8 @@ const PaymentPanel = ({
             {/* 🔹 결제금액 조정 UI */}
             {adjustmentOpen && (
               <div className="">
-                <div className="felx flex-row items-center gap-2  w-fit shrink-0">
-                  <div className="flex bg-gray-100 rounded-lg py-1 px-1 text-sm w-24">
+                <div className="flex flex-row items-center gap-2">
+                  <div className="flex bg-gray-100 rounded-lg py-1 px-1 text-sm w-28 h-fit">
                     <button
                       className={`flex-1 py-1 text-center rounded-lg transition ${
                         adjustmentType === "discount" ? "bg-white shadow text-gray-800 font-600" : "text-gray-500 font-400"
@@ -207,11 +214,15 @@ const PaymentPanel = ({
                     </button>
                   </div>
                   <input
-                      type="number"
-                      className="p-2 w-24 text-right border-b border-gray-200"
-                      value={adjustmentAmount}
-                      onChange={(e) => setAdjustmentAmount(e.target.value)}
-                    />
+                    ref={adjustmentInputRef}
+                    type="number"
+                    className="p-2 w-full text-right border-b border-gray-200"
+                    placeholder={`${adjustmentType === "discount" ? "할인" : "추가"} 금액을 입력하세요`}
+                    value={adjustmentAmount == 0 ? "" : adjustmentAmount}
+                    onFocus={() => setAdjustmentAmount("")}
+                    onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
+                    onChange={(e) => { const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); }}
+                  />
 
                   {/* <div className="flex items-center gap-2 justify-end">
                     {adjustmentType === "discount" ? <MinusIcon /> : <PlusIcon />}

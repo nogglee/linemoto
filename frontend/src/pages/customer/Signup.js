@@ -62,16 +62,17 @@ const SignupForm = () => {
   } catch (error) {
     console.error("❌ 회원가입 오류:", error.response?.data?.message || error.message);
     
-    // ✅ 중복된 번호일 경우
-    if (error.response?.status === 400 && error.response.data.message === "이미 등록된 번호입니다.") {
+    // ✅ 중복된 번호일 경우 회원가입 중단 (return 추가)
+    if (error.response?.status === 400 && (error.response.data.message === "이미 등록된 전화번호입니다." || error.response.data.error === "이미 등록된 전화번호입니다.")) {
       toast.error("이미 가입된 휴대폰 번호입니다. 다른 번호를 사용해 주세요.");
-    } else {
-      toast.error("회원가입에 실패했습니다. 다시 시도해 주세요.");
+      setIsSubmitting(false);
+      return; // 🚀 여기서 종료해야 회원가입이 진행되지 않음!
     }
-
+    // 일반적인 회원가입 실패 처리
+    toast.error("회원가입에 실패했습니다. 다시 시도해 주세요.");
     setIsSubmitting(false);
   }
-  };
+};
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 space-y-4 bg-white shadow-lg rounded-xl">
