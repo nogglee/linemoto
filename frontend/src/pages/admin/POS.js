@@ -10,8 +10,8 @@ const POS = (user) => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [usedPoints, setUsedPoints] = useState(0);
-  const [categories, setCategories] = useState(["ETC"]);
-  const [selectedCategory, setSelectedCategory] = useState("ETC");
+  const [categories, setCategories] = useState([""]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   // 상품 목록 불러오기 및 카테고리 세팅
   useEffect(() => {
@@ -22,6 +22,10 @@ const POS = (user) => {
       const uniqueCategories = [...new Set(data.map((product) => product.category))];
     
       setCategories(uniqueCategories);
+
+      if (uniqueCategories.length > 0) {
+        setSelectedCategory(uniqueCategories[0]);
+      }
     };
     fetchProducts();
   }, []);
@@ -76,13 +80,13 @@ const POS = (user) => {
   };
 
   return (
-    <div className="flex h-full w-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] overflow-hidden font-body">
-      <div className="w-full p-8">
-        <div className="flex border-b border-gray-300 mb-4 text-2xl">
+    <div className="flex h-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] font-body overflow-hidden">
+      <div className="flex flex-col w-full p-8">
+        <div className="flex border-b border-gray-300 mb-4 overflow-scroll">
           {categories.map((category) => (
             <button
               key={category}
-              className={`py-3 px-6 text-gray-500 hover:text-gray-950 font-medium whitespace-nowrap ${
+              className={`sm:py-1 md:py-2 lg:py-3 sm:px-4 md:px-5 lg:px-6 text-gray-500 hover:text-gray-950 font-medium sm:text-base md:text-xl lg:text-2xl whitespace-nowrap ${
                 selectedCategory === category ? "border-b-2 border-black text-gray-950 font-bold" : ""
               }`}
               onClick={() => setSelectedCategory(category)}
@@ -93,8 +97,14 @@ const POS = (user) => {
         </div>
 
         <div
-          className="grid w-full gap-1 md:gap-2 lg:gap-10"
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}
+          className="flex flex-row flex-wrap sm:gap-3 md:gap-4 lg:gap-4"
+          // className="max-w-full h-fit grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] grid-rows-[repeat(auto-fit,minmax(180px,1fr))]  sm:gap-3 md:gap-4 lg:gap-4"
+          // className="max-w-full grid sm:gap-1 md:gap-2 lg:gap-10"
+          // style={{
+          //   display: "grid",
+          //   gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          //   gridAutoRows: "minmax(140px, auto)",
+          // }}
         >
             {products
               .filter((product) =>
@@ -104,16 +114,16 @@ const POS = (user) => {
                 <button
                   key={product.id}
                   disabled={product.stock === 0}
-                  className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start w-[140px] md:w-[160px] lg:w-[180px] aspect-square ${
+                  className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-square ${
                     product.stock === 0 ? "bg-gray-300 text-white cursor-not-allowed" : "bg-white"
                   }`}
                   onClick={() => addToCart(product)}
                 >
-                  <h3 className="text-lg font-semibold text-left">{product.name}</h3>
+                  <h3 className="sm:text-sm md:text-base lg:text-lg font-semibold text-left">{product.name}</h3>
                   {product.stock === 0 ? (
                     <p className="font-bold">품절</p>
                   ) : (
-                    <p className="text-lg">{product.price.toLocaleString()} 원</p>
+                    <p className="sm:text-sm md:text-lg lg:text-xl">{product.price.toLocaleString()}원</p>
                   )}
                 </button>
               ))}

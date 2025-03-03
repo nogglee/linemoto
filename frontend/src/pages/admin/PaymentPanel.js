@@ -132,268 +132,266 @@ const PaymentPanel = ({
   };
 
   return (
-    <div className="w-[320px] bg-white border-l border-gray-200 overflow-auto">
+    <div className="w-[400px] bg-white border-l border-gray-200 overflow-auto">
+      <div className="flex flex-col justify-between h-full">
       <div className="flex justify-between items-center border-b border-gray-100 p-5 font-500">
         <button className="bg-gray-100 px-2.5 py-1 rounded-md text-red-500 text-sm" onClick={clearCart}>
           전체삭제
         </button>
         <span className="text-blue-500">{totalQuantity}건</span>
       </div>
-      <div className="flex flex-col justify-between h-full">
-        <div className="">
-          {/* 🔹 상품 리스트 */}
-          {cartItems.length === 0 ? (
-            <p className="flex flex-col gap-4 p-5 text-gray-400">상품을 선택해 주세요</p>
-          ) : (
-            cartItems.map((item) => (
-              <div key={item.id} className="flex flex-col gap-4 border-b border-gray-100 p-5">
-                <div className="flex justify-between">
-                  <button className="bg-gray-100 px-2.5 py-1 h-fit rounded-md text-red-500 font-500  text-sm" onClick={() => removeItem(item.id)}>
-                    삭제
+      <div className="flex flex-col h-full">
+        {/* 🔹 상품 리스트 */}
+        {cartItems.length === 0 ? (
+          <p className="flex flex-col gap-4 p-5 text-gray-400">상품을 선택해 주세요</p>
+        ) : (
+          cartItems.map((item) => (
+            <div key={item.id} className="flex flex-col gap-4 border-b border-gray-100 p-5">
+              <div className="flex justify-between">
+                <button className="bg-gray-100 px-2.5 py-1 h-fit rounded-md text-red-500 font-500  text-sm" onClick={() => removeItem(item.id)}>
+                  삭제
+                </button>
+              <div className="flex items-center border border-gray-200 rounded-lg h-8 px-2.5">
+                  <button className="rounded-md hover:bg-gray-200 transition disabled:opacity-50" onClick={() => removeFromCart(item)}>
+                    <MinusIcon />
                   </button>
-                <div className="flex items-center border border-gray-200 rounded-lg h-8 px-2.5">
-                    <button className="rounded-md hover:bg-gray-200 transition disabled:opacity-50" onClick={() => removeFromCart(item)}>
-                      <MinusIcon />
-                    </button>
-                    <span className="text-gray-900 font-500 text-lg mx-4">{item.quantity}</span>
-                    <button className="rounded-md hover:bg-gray-200 transition" onClick={() => addToCart(item)}>
-                      <PlusIcon />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-700 text-lg">{item.name}</span>
-                  <span className="font-300 text-lg">{(item.price * item.quantity).toLocaleString()}</span>
+                  <span className="text-gray-900 font-500 text-lg mx-4">{item.quantity}</span>
+                  <button className="rounded-md hover:bg-gray-200 transition" onClick={() => addToCart(item)}>
+                    <PlusIcon />
+                  </button>
                 </div>
               </div>
-            ))
-          )}
-
-          {/* 🔹 최종 결제 금액 */}
-          {cartItems.length > 0 && (
-            <div className="flex flex-col border-b border-gray-100 p-5 gap-2">
-              <div className={`flex items-center ${ appliedAdjustment ? "justify-end" : "justify-between" }`}>
-                {appliedAdjustment === 0 && (
-                  <button
-                    className={`px-2.5 py-1 rounded-md text-sm text-blue-500 bg-blue-50`}
-                    onClick={() => setAdjustmentOpen(!adjustmentOpen)}
-                  >
-                    {adjustmentOpen ? "닫기" : "금액 조정"}
-                  </button>
-                )}
-                <span className="font-bold text-xl">총 {finalAmount.toLocaleString()}원</span>
-                </div>
-
-              {/* 🔹 결제금액 조정 UI */}
-              {adjustmentOpen && (
-                <div className="mb-4 border p-3 rounded-lg bg-gray-100">
-                  <div className="mb-2">
-                    <label className="block text-gray-700">조정 타입</label>
-                    <div className="flex space-x-4">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="adjustmentType"
-                          checked={adjustmentType === "discount"}
-                          value="discount"
-                          onChange={() => setAdjustmentType("discount")}
-                          min="0"
-                          max={adjustmentType === "discount" ? maxDiscount : undefined}
-                        />
-                        <span>할인</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name="adjustmentType"
-                          value="addition"
-                          checked={adjustmentType === "addition"}
-                          onChange={() => setAdjustmentType("addition")}
-                        />
-                        <span>추가</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="block text-gray-700">조정 금액</label>
-                    <input
-                      type="number"
-                      className="border rounded-lg p-2 w-full text-right"
-                      value={adjustmentAmount}
-                      onChange={(e) => setAdjustmentAmount(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700">조정 사유</label>
-                    <input
-                      type="text"
-                      className="border rounded-lg p-2 w-full"
-                      value={adjustmentReason}
-                      onChange={(e) => setAdjustmentReason(e.target.value)}
-                    />
-                  </div>
-
-                  <button
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg mt-2"
-                    onClick={applyAdjustment}
-                  >
-                    조정금액 적용
-                  </button>
-                </div>
-              )}
-
-              {/* 🔹 조정 금액 표시 */}
-              {appliedAdjustment !== 0 && (
-                <div className="mb-2 text-gray-400 flex justify-between items-center">
-                  <button
-                    className="text-gray-500 border border-gray-500 px-2.5 py-1 rounded-md text-sm"
-                    onClick={removeAdjustment}
-                  >
-                    {appliedAdjustment < 0 ? "할인 취소" : "할증 취소"}
-                  </button>
-                  <span>
-                    {appliedAdjustment < 0
-                      ? `- ${Math.abs(appliedAdjustment).toLocaleString()}원`
-                      : `+ ${Math.abs(appliedAdjustment).toLocaleString()}원`}
-                  </span>
-                </div>
-              )}
+              <div className="flex justify-between items-center">
+                <span className="font-700 text-lg">{item.name}</span>
+                <span className="font-300 text-lg">{(item.price * item.quantity).toLocaleString()}</span>
+              </div>
             </div>
-          )}
-        </div>
-        <div className="pb-10">
-          {/* 🔹 회원 선택 */}
-          {/* ✅ 회원 선택 */}
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-1">회원</label>
-            <div className="relative flex items-center border rounded-lg p-2">
-              {selectedMember ? (
-                <>
-                  <span className="text-gray-900 font-semibold flex-1">{selectedMember.name}</span>
-                  <button
-                    className="text-gray-500 hover:text-red-500 ml-2"
-                    onClick={() => setSelectedMember(null)}
-                  >
-                    ✕
-                  </button>
-                </>
-              ) : (
+          ))
+        )}
+
+        {/* 🔹 최종 결제 금액 */}
+        {cartItems.length > 0 && (
+          <div className="flex flex-col border-b border-gray-100 p-5 gap-2">
+            <div className={`flex items-center ${ appliedAdjustment ? "justify-end" : "justify-between" }`}>
+              {appliedAdjustment === 0 && (
                 <button
-                  className="bg-gray-900 text-white px-3 py-1 rounded-lg"
+                  className={`px-2.5 py-1 rounded-md text-sm text-blue-500 bg-blue-50`}
+                  onClick={() => setAdjustmentOpen(!adjustmentOpen)}
+                >
+                  {adjustmentOpen ? "닫기" : "금액 조정"}
+                </button>
+              )}
+              <span className="font-bold text-xl">총 {finalAmount.toLocaleString()}원</span>
+              </div>
+
+            {/* 🔹 결제금액 조정 UI */}
+            {adjustmentOpen && (
+              <div className="mb-4 border p-3 rounded-lg bg-gray-100">
+                <div className="mb-2">
+                  <label className="block text-gray-700">조정 타입</label>
+                  <div className="flex space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="adjustmentType"
+                        checked={adjustmentType === "discount"}
+                        value="discount"
+                        onChange={() => setAdjustmentType("discount")}
+                        min="0"
+                        max={adjustmentType === "discount" ? maxDiscount : undefined}
+                      />
+                      <span>할인</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="adjustmentType"
+                        value="addition"
+                        checked={adjustmentType === "addition"}
+                        onChange={() => setAdjustmentType("addition")}
+                      />
+                      <span>추가</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="mb-2">
+                  <label className="block text-gray-700">조정 금액</label>
+                  <input
+                    type="number"
+                    className="border rounded-lg p-2 w-full text-right"
+                    value={adjustmentAmount}
+                    onChange={(e) => setAdjustmentAmount(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700">조정 사유</label>
+                  <input
+                    type="text"
+                    className="border rounded-lg p-2 w-full"
+                    value={adjustmentReason}
+                    onChange={(e) => setAdjustmentReason(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  className="w-full bg-blue-500 text-white py-2 rounded-lg mt-2"
+                  onClick={applyAdjustment}
+                >
+                  조정금액 적용
+                </button>
+              </div>
+            )}
+
+            {/* 🔹 조정 금액 표시 */}
+            {appliedAdjustment !== 0 && (
+              <div className="mb-2 text-gray-400 flex justify-between items-center">
+                <button
+                  className="text-gray-500 border border-gray-500 px-2.5 py-1 rounded-md text-sm"
+                  onClick={removeAdjustment}
+                >
+                  {appliedAdjustment < 0 ? "할인 취소" : "할증 취소"}
+                </button>
+                <span>
+                  {appliedAdjustment < 0
+                    ? `- ${Math.abs(appliedAdjustment).toLocaleString()}원`
+                    : `+ ${Math.abs(appliedAdjustment).toLocaleString()}원`}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="mb-10 px-5">
+        {/* 🔹 회원 선택 */}
+        {/* ✅ 회원 선택 */}
+        <div className="flex justify-between items-center border border-gray-900 rounded-xl px-3 py-2.5">
+            {selectedMember ? (
+              <>
+                <span className="text-gray-900 font-semibold flex-1">{selectedMember.name}</span>
+                <DeleteIcon 
+                  onClick={() => setSelectedMember(null)} 
+                  className="cursor-pointer"
+                />
+              </>
+            ) : (
+              <>
+                <span className="text-base font-500 text-gray-600">비회원</span>
+                <button
+                  className="bg-gray-900 text-white text-sm font-500 px-2.5 py-1 rounded-md"
                   onClick={() => setIsMemberModalOpen(true)}
                 >
                   선택
                 </button>
-              )}
-            </div>
+              </>
+            )}
+        </div>
+
+        
+
+        {/* 🔹 결제수단 선택 (라디오 버튼) */}
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">결제 수단</label>
+          <div className="grid grid-cols-2 gap-2" >
+            {["카드", "현금", "계좌이체", "미수금"].map((method) => (
+              <label
+                key={method}
+                className={`border rounded-lg p-3 text-center cursor-pointer ${
+                  paymentMethod === method ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={method}
+                  checked={paymentMethod === method}
+                  onChange={(e) => {
+                    setPaymentMethod(e.target.value);
+                  }}
+                  className="hidden"
+                />
+                {method}
+              </label>
+            ))}
           </div>
+        </div>
 
-          
+        
 
-          {/* 🔹 결제수단 선택 (라디오 버튼) */}
+        
+
+        
+
+        {/* ✅ 보유 포인트 */}
+        {/* ✅ 회원이 선택된 경우에만 보유 포인트 표시 */}
+        {selectedMember && (
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1">결제 수단</label>
-            <div className="grid grid-cols-2 gap-2" >
-              {["카드", "현금", "계좌이체", "미수금"].map((method) => (
-                <label
-                  key={method}
-                  className={`border rounded-lg p-3 text-center cursor-pointer ${
-                    paymentMethod === method ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value={method}
-                    checked={paymentMethod === method}
-                    onChange={(e) => {
-                      setPaymentMethod(e.target.value);
-                    }}
-                    className="hidden"
-                  />
-                  {method}
-                </label>
-              ))}
+            <label className="block text-gray-700 mb-1">보유포인트</label>
+            <div className="text-gray-900 font-bold text-lg">
+              {selectedMember.points.toLocaleString()}p
             </div>
           </div>
+        )}
 
-          
-
-          
-
-          
-
-          {/* ✅ 보유 포인트 */}
-          {/* ✅ 회원이 선택된 경우에만 보유 포인트 표시 */}
-          {selectedMember && (
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-1">보유포인트</label>
-              <div className="text-gray-900 font-bold text-lg">
-                {selectedMember.points.toLocaleString()}p
-              </div>
-            </div>
-          )}
-
-          {/* ✅ 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
-          {selectedMember && (
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-1">포인트 사용</label>
-            <input
-              type="number"
-              className="border rounded-lg p-2 w-full text-right"
-              value={usedPoints}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-                if (value < 0) return;
-                if (value > maxUsablePoints) {
-                  setUsedPoints(maxUsablePoints); // 초과 입력 방지
-                } else {
-                  setUsedPoints(value);
-                }
-              }}
-              disabled={!selectedMember || selectedMember.points < 50000} // 5만 미만이면 비활성화
-            />
-          </div>
-          )}
-
-          {/* ✅ 적립 예정 포인트 */}
-          {/* ✅ 회원이 선택된 경우에만 예상 포인트 표시 */}
-          {selectedMember && (
-            <div className="mb-4 text-right text-gray-700">
-              적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
-            </div>
-          )}
-
-          {/* ✅ 결제 버튼 */}
-          <button
-            className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
-            onClick={() => {
-              console.log("🛠 결제 버튼 클릭됨!");
-              console.log("🛠 handlePayment props 값:", handlePayment);
-              console.log("🔍 현재 관리자 정보(admin):", admin);          
-              handlePayment(paymentMethod)
+        {/* ✅ 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
+        {selectedMember && (
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">포인트 사용</label>
+          <input
+            type="number"
+            className="border rounded-lg p-2 w-full text-right"
+            value={usedPoints}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value < 0) return;
+              if (value > maxUsablePoints) {
+                setUsedPoints(maxUsablePoints); // 초과 입력 방지
+              } else {
+                setUsedPoints(value);
+              }
             }}
-            disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
-          >
-            {`${finalAmount.toLocaleString()}원 결제`}
-            <span className="bg-white text-black px-2 py-1 rounded-full text-sm">
-              {cartItems.length}
-            </span>
-          </button>
+            disabled={!selectedMember || selectedMember.points < 50000} // 5만 미만이면 비활성화
+          />
+        </div>
+        )}
 
-          {/* ✅ 회원 선택 모달 */}
-          {isMemberModalOpen && (
-            <SelectMemberModal
-              isOpen={isMemberModalOpen}
-              onClose={() => setIsMemberModalOpen(false)}
-              onSelect={(member) => {
-                handleSelectMember(member.id);
-                setIsMemberModalOpen(false);
-              }}
-            />
-          )}
+        {/* ✅ 적립 예정 포인트 */}
+        {/* ✅ 회원이 선택된 경우에만 예상 포인트 표시 */}
+        {selectedMember && (
+          <div className="mb-4 text-right text-gray-700">
+            적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
+          </div>
+        )}
+
+        {/* ✅ 결제 버튼 */}
+        <button
+          className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
+          onClick={() => {
+            console.log("🛠 결제 버튼 클릭됨!");
+            console.log("🛠 handlePayment props 값:", handlePayment);
+            console.log("🔍 현재 관리자 정보(admin):", admin);          
+            handlePayment(paymentMethod)
+          }}
+          disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
+        >
+          {`${finalAmount.toLocaleString()}원 결제`}
+          <span className="bg-white text-black px-2 py-1 rounded-full text-sm">
+            {cartItems.length}
+          </span>
+        </button>
+
+        {/* ✅ 회원 선택 모달 */}
+        {isMemberModalOpen && (
+          <SelectMemberModal
+            isOpen={isMemberModalOpen}
+            onClose={() => setIsMemberModalOpen(false)}
+            onSelect={(member) => {
+              handleSelectMember(member.id);
+              setIsMemberModalOpen(false);
+            }}
+          />
+        )}
         </div>
       </div>
     </div>
