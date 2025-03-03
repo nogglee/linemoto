@@ -5,16 +5,19 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Enter") {
-        event.preventDefault(); // 🔹 기본 동작 방지 (ex. 폼 자동 제출 방지)
+        event.preventDefault(); // 기본 동작 방지 (폼 자동 제출 방지)
         const password = inputRef.current.value;
-        if (password !== "expectedPassword") { // 여기에서 실제 비밀번호 체크 로직
-          showToast("비밀번호가 일치하지 않아요 👮🏻‍♂️", "error");
-        } else {
+
+        // 비밀번호가 일치하는지 확인하고, 일치하면 onSubmit 호출
+        if (password === `${process.env.REACT_APP_ADMIN_PASSWORD}`) {
           onSubmit(password); // 비밀번호가 맞으면 처리
+        } else {
+          showToast("비밀번호가 일치하지 않아요 👮🏻‍♂️", "error"); // 비밀번호 틀린 경우
         }
       }
+
       if (event.key === "Escape") {
-        onClose(); // 🔥 ESC 키 입력 시 모달 닫기
+        onClose(); // ESC 키 입력 시 모달 닫기
       }
     };
 
