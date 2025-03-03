@@ -84,6 +84,7 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:hover {
   border-color: #2D3139;
 }
+
 /* 카드 3D 회전 효과 */
 .product-card {
   width: 140px;

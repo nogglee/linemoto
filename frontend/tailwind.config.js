@@ -66,6 +66,7 @@ module.exports = {
     },
   },
   plugins: [],
+  safelist: ["cursor-pointer"],
   variants: {
     scrollbar: ['rounded']
   },
