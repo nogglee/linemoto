@@ -80,10 +80,6 @@ const PaymentPanel = ({
 
   // 조정금액 적용 핸들러
   const applyAdjustment = () => {
-    if (!adjustmentReason.trim()) {
-      alert("금액 변경에 대한 사유를 입력해주세요.");
-      return;
-    }
     setAppliedAdjustment(adjustedAmount);
     setAdjustmentOpen(false);
   };
@@ -178,7 +174,7 @@ const PaymentPanel = ({
 
         {/* 🔹 최종 결제 금액 */}
         {cartItems.length > 0 && (
-          <div className="flex flex-col border-b border-gray-100 p-5 gap-2">
+          <div className="flex flex-col p-5 gap-2">
             <div className={`flex items-center ${ appliedAdjustment ? "justify-end" : "justify-between" }`}>
               {appliedAdjustment === 0 && (
                 <button
@@ -194,8 +190,8 @@ const PaymentPanel = ({
             {/* 🔹 결제금액 조정 UI */}
             {adjustmentOpen && (
               <div className="">
-                <div className="flex flex-row items-center gap-2">
-                  <div className="flex bg-gray-100 rounded-lg py-1 px-1 text-sm w-28 h-fit">
+                <div className="flex flex-col gap-3 mt-2">
+                  <div className="flex bg-gray-100 rounded-lg py-1 px-1 text-sm w-full h-fit">
                     <button
                       className={`flex-1 py-1 text-center rounded-lg transition ${
                         adjustmentType === "discount" ? "bg-white shadow text-gray-800 font-600" : "text-gray-500 font-400"
@@ -215,44 +211,40 @@ const PaymentPanel = ({
                   </div>
                   <input
                     ref={adjustmentInputRef}
-                    type="number"
-                    className="p-2 w-full text-right border-b border-gray-200"
-                    placeholder={`${adjustmentType === "discount" ? "할인" : "추가"} 금액을 입력하세요`}
-                    value={adjustmentAmount == 0 ? "" : adjustmentAmount}
-                    onFocus={() => setAdjustmentAmount("")}
-                    onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
-                    onChange={(e) => { const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); }}
-                  />
-
-                  {/* <div className="flex items-center gap-2 justify-end">
-                    {adjustmentType === "discount" ? <MinusIcon /> : <PlusIcon />}
-                    <input
-                      type="number"
-                      className="p-2 text-right border-b border-gray-200"
-                      value={adjustmentAmount}
-                      onChange={(e) => setAdjustmentAmount(e.target.value)}
-                    />
-                  </div> */}
-                </div>
-                
-             
-
-                <div>
-                  <label className="block text-gray-700">조정 사유</label>
-                  <input
                     type="text"
-                    className="border rounded-lg p-2 w-full"
+                    className="border-b border-gray-200 p-2 w-full"
+                    placeholder="조정 사유를 입력하세요"
                     value={adjustmentReason}
                     onChange={(e) => setAdjustmentReason(e.target.value)}
                   />
+                  <div className="flex my-2 gap-2 justify-end">
+                    <input
+                      type="number"
+                      className={`border-b border-gray-200 p-2 w-full ${
+                        adjustmentAmount ? "text-right" : "text-left"
+                      }`}
+                      placeholder={`${adjustmentType === "discount" ? "할인" : "할증"} 금액을 입력하세요`}
+                      value={adjustmentAmount == 0 ? "" : adjustmentAmount}
+                      onFocus={() => setAdjustmentAmount("")}
+                      onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
+                      onChange={(e) => { const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); }}
+                    />
+                    <button
+                      className={`w-24 py-2 rounded-lg mt-2 text-white ${
+                        adjustmentAmount && adjustmentReason.trim()
+                          ? "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={applyAdjustment}
+                    >
+                      완료
+                    </button>
+                  </div>
                 </div>
+                
+          
 
-                <button
-                  className="w-full bg-blue-500 text-white py-2 rounded-lg mt-2"
-                  onClick={applyAdjustment}
-                >
-                  조정금액 적용
-                </button>
+
               </div>
             )}
 
