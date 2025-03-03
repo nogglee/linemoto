@@ -38,8 +38,8 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="flex w-full mt-4 sm:px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
-      <div className="mt-20 sm:px-4 md:px-[300px]">
+    <div className="flex w-full mt-4 px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
+      <div className="mt-20 ">
         <h1 className="text-4xl font-semibold text-center mb-10">로그인</h1>
         <input
           type="text"
@@ -54,6 +54,7 @@ const Login = ({ setUser }) => {
           className="w-full p-2 border rounded mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <button onClick={handleLogin} className="w-full px-4 py-3 bg-blue-500 text-white rounded">로그인</button>
       </div>

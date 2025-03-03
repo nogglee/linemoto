@@ -3,9 +3,6 @@ import { showToast } from "../../common/components/Toast";
 
 function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
   useEffect(() => {
-    if (isOpen && inputRef?.current) {
-      inputRef.current.focus(); // 🔹 모달이 열릴 때 자동 포커싱
-    }
     const handleKeyDown = (event) => {
       if (event.key === "Enter") {
         event.preventDefault(); // 🔹 기본 동작 방지 (ex. 폼 자동 제출 방지)
@@ -28,7 +25,7 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose, onSubmit, inputRef]);
+  }, [isOpen, onClose, onSubmit, inputRef]); // 의존성 배열에 필요한 값 추가
 
   return (
     isOpen && (
@@ -40,7 +37,6 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
             ref={inputRef}
             placeholder="비밀번호 입력"
             className="border p-2 rounded w-full"
-            onKeyDown={handleKeyDown}
           />
           <div className="mt-4 flex justify-end gap-2">
             <button className="bg-gray-300 px-4 py-2 rounded" onClick={onClose}>취소</button>
