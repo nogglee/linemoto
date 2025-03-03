@@ -12,7 +12,6 @@ const Login = ({ setUser }) => {
     try {
       const userData = await login(phoneNumber, password);
       if (userData) {
-        console.log("🛠 로그인 성공, 저장되는 유저 데이터:", userData.data); // 🔥 확인용 로그 추가
 
         localStorage.setItem("user", JSON.stringify(userData.data)); // ✅ user.data만 저장
 
@@ -29,6 +28,12 @@ const Login = ({ setUser }) => {
       }
     } catch (error) {
       showToast("로그인에 실패했어요 😞", "error");
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleLogin(); // Enter키 눌렀을 때 로그인 함수 호출
     }
   };
 

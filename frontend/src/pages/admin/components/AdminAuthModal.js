@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { showToast } from "../../common/components/Toast";
 
 function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
   useEffect(() => {
@@ -8,7 +9,12 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
     const handleKeyDown = (event) => {
       if (event.key === "Enter") {
         event.preventDefault(); // 🔹 기본 동작 방지 (ex. 폼 자동 제출 방지)
-        onSubmit(inputRef.current.value);
+        const password = inputRef.current.value;
+        if (password !== "expectedPassword") { // 여기에서 실제 비밀번호 체크 로직
+          showToast("비밀번호가 일치하지 않아요 👮🏻‍♂️", "error");
+        } else {
+          onSubmit(password); // 비밀번호가 맞으면 처리
+        }
       }
       if (event.key === "Escape") {
         onClose(); // 🔥 ESC 키 입력 시 모달 닫기
@@ -23,15 +29,6 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose, onSubmit, inputRef]);
-
-  
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault(); // 🔹 기본 동작 방지 (ex. 폼 자동 제출 방지)
-      onSubmit(inputRef.current.value);
-    }
-  };
 
   return (
     isOpen && (

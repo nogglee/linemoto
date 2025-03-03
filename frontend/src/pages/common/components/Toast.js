@@ -7,23 +7,22 @@ import FailIcon from "../../../assets/icons/ico-toast-fail.svg";
 export const showToast = (message, type = "success") => {
 
   const toastId = toast(
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <img 
         src={type === "success" ? SuccessIcon : FailIcon} 
         alt="icon" 
-        className="w-7 h-7"
+        className="w-8 h-8"
       />
       <span>{message}</span>
     </div>,
     {
-      className: "bg-gray-800 text-white rounded-2xl px-4 py-3 flex items-center",
-      bodyClassName: "text-sm font-medium",
       progressClassName: "hidden",
       hideProgressBar: true,
       position: "top-center",
       closeOnClick: true,
       pauseOnHover: false,
       draggable: false,
+      closeButton: false,
     }
   );
 
