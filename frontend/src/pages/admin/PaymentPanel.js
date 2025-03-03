@@ -89,7 +89,18 @@ const PaymentPanel = ({
 
   // 조정금액 적용 핸들러
   const applyAdjustment = () => {
+    if (!adjustmentReason.trim()) {
+      showToast("조정 사유를 입력해 주세요.", "fail");
+      return;
+    }
+
+    if (!adjustedAmount) {
+      showToast("조정 금액을 입력해 주세요.", "fail");
+      return;
+    }
+
     setAppliedAdjustment(adjustedAmount);
+    showToast(`${adjustmentType === "discount" ? "할인" : "할증"}이 적용되었습니다.`, "success");
     setAdjustmentOpen(false);
   };
 
@@ -98,6 +109,13 @@ const PaymentPanel = ({
     setAppliedAdjustment(0);
     setAdjustmentAmount(0);
     setAdjustmentReason("");
+  };
+
+   // 키다운 이벤트 처리
+   const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      applyAdjustment(); // Enter 키 눌렀을 때 applyAdjustment 실행
+    }
   };
 
   // 결제 핸들러
@@ -226,6 +244,7 @@ const PaymentPanel = ({
                   <input
                     ref={adjustmentInputRef}
                     type="text"
+                    onKeyDown={handleKeyDown}
                     className="border-b border-gray-200 p-2 w-full"
                     placeholder="조정 사유를 입력하세요"
                     value={adjustmentReason}
@@ -236,6 +255,7 @@ const PaymentPanel = ({
                       type="number"
                       className="border-b border-gray-200 py-2 pl-2 w-full"
                       placeholder={`${adjustmentType === "discount" ? "할인" : "할증"} 금액을 입력하세요`}
+                      onKeyDown={handleKeyDown}
                       value={adjustmentAmount == 0 ? "" : adjustmentAmount}
                       onFocus={() => setAdjustmentAmount("")}
                       onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
