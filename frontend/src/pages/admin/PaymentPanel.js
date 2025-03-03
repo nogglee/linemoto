@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { fetchMembers } from "../../api/members";
 import { submitTransaction } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
-import { toast } from "react-toastify";
+import { showToast } from "../common/components/Toast";
 import { ReactComponent as MinusIcon } from "../../assets/icons/ico-minus.svg";
 import { ReactComponent as PlusIcon } from "../../assets/icons/ico-plus.svg";
 import { ReactComponent as DeleteIcon } from "../../assets/icons/ico-delete-circle.svg";
@@ -29,7 +29,9 @@ const PaymentPanel = ({
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [appliedAdjustment, setAppliedAdjustment] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  
   const adjustmentInputRef = useRef(null); 
+  const pointInputRef = useRef(null);
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const maxDiscount = totalAmount; // 할인 최대 한도 = 상품 총 가격
@@ -52,9 +54,16 @@ const PaymentPanel = ({
 
   useEffect(() => {
     if (adjustmentOpen && adjustmentInputRef.current) {
-      adjustmentInputRef.current.focus(); // ✅ 조정 UI 열릴 때 input에 포커스
+      adjustmentInputRef.current.focus();
     }
-  }, [adjustmentOpen]); // ✅ adjustmentOpen 상태가 변경될 때 실행
+  }, [adjustmentOpen]); 
+
+  useEffect(() => {
+    if (selectedMember && pointInputRef.current) {
+      pointInputRef.current.focus(); 
+    }
+  }, [selectedMember]);
+
 
   // 회원 목록 불러오기
   useEffect(() => {
@@ -116,7 +125,7 @@ const PaymentPanel = ({
 
       await submitTransaction(transactionData);
 
-      toast.success("✅ 결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
+      showToast("결제가 완료되었습니다!", "success");
       setCartItems([]);
       setUsedPoints(0);
       setSelectedMember(null);
@@ -128,7 +137,7 @@ const PaymentPanel = ({
     }
     catch (error) {
       console.error("❌ 결제 실패:", error);
-      toast.error("❌ 결제에 실패했습니다. 다시 시도해주세요.");
+      showToast("결제에 실패했습니다. 다시 시도해 주세요.", "fail");
     } finally {
       setIsProcessing(false); // ✅ 결제 완료 후 버튼 활성화
     }
@@ -325,6 +334,7 @@ const PaymentPanel = ({
           <span className="font-500 text-gray-600 white-space: nowrap;">포인트 사용</span>
           <div className="flex font-700">
           <input
+            ref={pointInputRef}
             type="number"
             className="text-right bg-transparent w-28"
             placeholder={`최대 ${maxUsablePoints.toLocaleString()}p`} // ✅ 최대 사용 가능 포인트 표시

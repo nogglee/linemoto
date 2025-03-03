@@ -12,6 +12,8 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
       const loadMembers = async () => {
         try {
           const memberList = await fetchMembers();
+          memberList.sort((a, b) => a.name.localeCompare(b.name, "ko-KR"));
+
           console.log("Fetched members:", memberList);
           setMembers(memberList);
         } catch (error) {
@@ -22,6 +24,22 @@ const SelectMemberModal = ({ isOpen, onClose, onSelect }) => {
       loadMembers();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose(); // 🔥 ESC 키 입력 시 모달 닫기
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const filteredMembers = members.filter((member) => {
     if (!searchTerm) return true;

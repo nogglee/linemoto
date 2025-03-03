@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CategorySelector from './CategorySelect';
-import { toast } from 'react-toastify';
+import { showToast } from '../../common/components/Toast';
 import { uploadImage } from '../../../api/products';
 
 const getDefaultImageUrl = () => {
@@ -36,17 +36,17 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addP
     e.preventDefault();
 
     if (!newProduct.name) {
-      toast.error("상품명을 입력해 주세요!");
+      showToast("상품명을 입력해 주세요!", "fail");
       return;
     }
-
+    
     if (!newProduct.price) {
-      toast.error("가격을 입력해 주세요!");
+      showToast("가격을 입력해 주세요!", "fail");
       return;
     }
-
+    
     if (!newProduct.category) {
-      toast.error("카테고리를 선택해 주세요!");
+      showToast("카테고리를 선택해 주세요!", "fail");
       return;
     }
     
@@ -67,8 +67,6 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addP
         category: newProduct.category,
         image_url: imageUrl,
       };
-
-      console.log("🚀 서버 전송:", formattedProduct);
       
       const addedProduct = await addProduct(formattedProduct); // ✅ 상품 추가 API 호출
 
@@ -77,11 +75,10 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addP
       }
 
       setNewProduct({ name: '', price: '', stock: '', category: '', imageFile: null });
-      toast.success("✅ 상품이 추가되었습니다!");
+      showToast("상품이 추가되었습니다!", "success");      
       onClose();
     } catch (error) {
-      console.error("❌ 상품 추가 실패:", error);
-      toast.error("상품 추가 중 오류가 발생했습니다.");
+      showToast("상품 추가 중 오류가 발생했습니다.", "fail");      
     }
   };
 

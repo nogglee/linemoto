@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { showToast } from "../common/components/Toast";
 import { signupUser } from "../../api/auth";
 
 const SignupForm = () => {
@@ -32,22 +32,22 @@ const SignupForm = () => {
     setIsSubmitting(true); // ✅ 버튼 클릭 즉시 비활성화
   
     if (!name) {
-      toast.error("이름을 입력해 주세요!");
+      showToast("이름이 비어있어요!", "fail");
       setIsSubmitting(false);
       return;
     }
     if (!phone) {
-      toast.error("휴대폰번호를 입력해 주세요!");
+      showToast("휴대폰번호는 필수입니다!", "fail");
       setIsSubmitting(false);
       return;
     }
     if (!year || !month || !day) {
-      toast.error("생년월일을 입력해 주세요!");
+      showToast("생년월일은 임시비밀번호로 쓰여요!", "fail");
       setIsSubmitting(false);
       return;
     }
     if (!isChecked) {
-      toast.error("개인정보 동의에 체크해 주세요!");
+      showToast("개인정보 제공에 동의해 주세요.", "fail");
       setIsSubmitting(false);
       return;
     }
@@ -57,19 +57,19 @@ const SignupForm = () => {
 
   try {
     await signupUser(userData);
-    toast.success("회원가입이 완료되었습니다!", { position: "top-center", autoClose: 2000 });
+    showToast("회원가입이 완료되었습니다!", "success");
     setTimeout(() => navigate("/login"), 2000);
   } catch (error) {
     console.error("❌ 회원가입 오류:", error.response?.data?.message || error.message);
     
-    // ✅ 중복된 번호일 경우 회원가입 중단 (return 추가)
+    // 중복된 번호일 경우 회원가입 중단 (return 추가)
     if (error.response?.status === 400 && (error.response.data.message === "이미 등록된 전화번호입니다." || error.response.data.error === "이미 등록된 전화번호입니다.")) {
-      toast.error("이미 가입된 휴대폰 번호입니다. 다른 번호를 사용해 주세요.");
+      showToast("이미 가입된 번호예요. 가입한적이 있으신가요?", "fail");
       setIsSubmitting(false);
       return; // 🚀 여기서 종료해야 회원가입이 진행되지 않음!
     }
     // 일반적인 회원가입 실패 처리
-    toast.error("회원가입에 실패했습니다. 다시 시도해 주세요.");
+    showToast("회원가입에 실패했어요. 다시 시도해 주세요 🙏", "fail");
     setIsSubmitting(false);
   }
 };

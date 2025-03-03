@@ -5,7 +5,26 @@ function AdminAuthModal({ isOpen, onClose, onSubmit, inputRef }) {
     if (isOpen && inputRef?.current) {
       inputRef.current.focus(); // 🔹 모달이 열릴 때 자동 포커싱
     }
-  }, [isOpen, inputRef]);
+    const handleKeyDown = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault(); // 🔹 기본 동작 방지 (ex. 폼 자동 제출 방지)
+        onSubmit(inputRef.current.value);
+      }
+      if (event.key === "Escape") {
+        onClose(); // 🔥 ESC 키 입력 시 모달 닫기
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose, onSubmit, inputRef]);
+
+  
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {

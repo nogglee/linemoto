@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { getProducts } from "../../api/products";
 import { fetchMemberInfo } from "../../api/members";
 import PaymentPanel from "./PaymentPanel";
-import { toast } from "react-toastify";
+import { showToast } from "../common/components/Toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const POS = (user) => {
   const [products, setProducts] = useState([]);
@@ -11,6 +12,7 @@ const POS = (user) => {
   const [usedPoints, setUsedPoints] = useState(0);
   const [categories, setCategories] = useState([""]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [toastMessage, setToastMessage] = useState(null);
 
   // 상품 목록 불러오기 및 카테고리 세팅
   useEffect(() => {
@@ -19,13 +21,13 @@ const POS = (user) => {
       setProducts(data);
     
       const uniqueCategories = [...new Set(data.map((product) => product.category))];
-    
       setCategories(uniqueCategories);
 
       if (uniqueCategories.length > 0) {
-        setSelectedCategory(uniqueCategories[0]);
+        setTimeout(() => setSelectedCategory(uniqueCategories[0]), 0);
       }
     };
+
     fetchProducts();
   }, []);
 
@@ -33,25 +35,33 @@ const POS = (user) => {
   const addToCart = (product) => {
     setSelectedProducts((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
-      if (existingItem) {
-        if (existingItem.quantity >= product.stock) {
-          // 이미 토스트가 표시되었는지 확인하거나, 
-          // 단순히 return prev; (한 번만 호출되도록)
-          toast.error("재고 수량을 초과하였습니다.", { toastId: `stock-${product.id}` });
-          return prev;
-        }
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      } else {
-        if (product.stock <= 0) {
-          toast.error("품절된 상품입니다.", { toastId: `soldout-${product.id}` });
-          return prev;
-        }
-        return [...prev, { ...product, quantity: 1 }];
+
+      // 재고 초과 시 토스트 노출 후 함수 종료
+      if (existingItem && existingItem.quantity >= product.stock) {
+        setToastMessage("재고 수량을 초과하였습니다."); // ✅ 상태 업데이트만 수행
+        return prev;
       }
+  
+      if (!existingItem && product.stock <= 0) {
+        setToastMessage("품절된 상품입니다."); // ✅ 상태 업데이트만 수행
+        return prev;
+      }
+  
+      return existingItem
+        ? prev.map((item) =>
+            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          )
+        : [...prev, { ...product, quantity: 1 }];
     });
   };
+  
+  // ✅ 상태가 변경될 때만 토스트 메시지를 띄움
+  useEffect(() => {
+    if (toastMessage) {
+      showToast(toastMessage, "fail");
+      setToastMessage(null); // ✅ 토스트 메시지를 초기화
+    }
+  }, [toastMessage]);
 
   // 장바구니에서 상품 수량 감소 시 아이템 삭제
   const removeFromCart = (product) => {
@@ -85,12 +95,20 @@ const POS = (user) => {
           {categories.map((category) => (
             <button
               key={category}
-              className={`sm:py-1 md:py-2 lg:py-3 sm:px-4 md:px-5 lg:px-6 text-gray-500 hover:text-gray-950 font-medium sm:text-base md:text-xl lg:text-2xl whitespace-nowrap ${
-                selectedCategory === category ? "border-b-2 border-black text-gray-950 font-bold" : ""
-              }`}
+              className={`relative sm:py-1 md:py-2 lg:py-3 sm:px-4 md:px-5 lg:px-6 font-medium sm:text-base md:text-xl lg:text-2xl whitespace-nowrap
+                ${selectedCategory === category ? "text-gray-950 font-bold" : "text-gray-500 hover:text-gray-900"}`}
               onClick={() => setSelectedCategory(category)}
             >
               {category}
+
+              {/* ✅ 선택된 카테고리에 애니메이션 효과 추가 */}
+              {selectedCategory === category && (
+                <motion.div
+                  layoutId="category-underline"
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-gray-950 rounded-full"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
             </button>
           ))}
         </div>
@@ -104,9 +122,9 @@ const POS = (user) => {
               <button
                 key={product.id}
                 disabled={product.stock === 0}
-                className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-square ${
-                  product.stock === 0 ? "bg-gray-300 text-white cursor-not-allowed" : "bg-white"
-                }`}
+                className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-square 
+                  transition-transform duration-200 ease-in-out transform hover:scale-105 
+                  ${product.stock === 0 ? "bg-gray-300 text-white cursor-not-allowed" : "bg-white"}`}
                 onClick={() => addToCart(product)}
               >
                 <h3 className="sm:text-sm md:text-base lg:text-lg font-semibold text-left">{product.name}</h3>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../api/auth";
-import { toast } from "react-toastify";
+import { showToast } from "../common/components/Toast";
 
 const Login = ({ setUser }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -18,7 +18,7 @@ const Login = ({ setUser }) => {
 
         setUser(userData.data); // ✅ 상태 업데이트 보장
 
-        toast.success("로그인 성공!");
+        showToast(`또 오셨네요 ${userData.data.name || ""} 라이더님!`, "success");
 
         // ✅ 로그인 성공 후 즉시 이동
         if (userData.data.role === "admin") {
@@ -28,7 +28,7 @@ const Login = ({ setUser }) => {
         }
       }
     } catch (error) {
-      toast.error("로그인 실패");
+      showToast("로그인에 실패했어요 😞", "error");
     }
   };
 

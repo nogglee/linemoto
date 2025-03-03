@@ -60,11 +60,7 @@ function App() {
 
       <Routes>
         {/* 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
-        <Route path="/" element={user ? (user.role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/customer" replace />
-          ) : (
-            <CategoryList />
-          )
-        } />
+        <Route path="/" element={user ? (user.role === "admin" ? <Navigate to="/admin" replace /> : <CategoryList />) : <CategoryList />} />
         
         <Route path="/" element={<CategoryList />} />
 

@@ -17,8 +17,7 @@ function Sidebar({ user, setUser }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const passwordInputRef = useRef(null);
   
-  const location = useLocation();
-  console.log("현재 경로:", location.pathname);
+  const location = useLocation();  
   const isSalesActive = location.pathname === "/admin/sales";
 
   const handleLogout = () => {
