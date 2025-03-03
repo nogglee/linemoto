@@ -137,10 +137,15 @@ const PaymentPanel = ({
   return (
     <div className="w-[400px] bg-white border-l border-gray-200 overflow-auto">
       <div className="flex flex-col justify-between h-full">
-      <div className="flex justify-between items-center border-b border-gray-100 p-5 font-500">
-        <button className="bg-gray-100 px-2.5 py-1 rounded-md text-red-500 text-sm" onClick={clearCart}>
-          전체삭제
-        </button>
+      <div className={`flex items-center border-b border-gray-100 p-5 font-500 ${ cartItems.length > 1 ? "justify-between" : "justify-end" }`}>
+        {cartItems.length > 1 && (
+          <button
+            className="bg-gray-100 px-2.5 py-1 rounded-md text-red-500 text-sm"
+            onClick={clearCart}
+          >
+            전체삭제
+          </button>
+        )}
         <span className="text-blue-500">{totalQuantity}건</span>
       </div>
       <div className="flex flex-col h-full">
