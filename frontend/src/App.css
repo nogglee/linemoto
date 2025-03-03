@@ -85,6 +85,16 @@ input[type="checkbox"]:hover {
   border-color: #2D3139;
 }
 
+input,
+button:focus {
+  outline: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 /* 카드 3D 회전 효과 */
 .product-card {
   width: 140px;
