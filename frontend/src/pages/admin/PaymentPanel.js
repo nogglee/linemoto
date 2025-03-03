@@ -217,7 +217,7 @@ const PaymentPanel = ({
                     value={adjustmentReason}
                     onChange={(e) => setAdjustmentReason(e.target.value)}
                   />
-                  <div className="flex my-2 gap-2 justify-end">
+                  <div className="flex gap-2 justify-end">
                     <input
                       type="number"
                       className={`border-b border-gray-200 p-2 w-full ${
@@ -230,7 +230,7 @@ const PaymentPanel = ({
                       onChange={(e) => { const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); }}
                     />
                     <button
-                      className={`w-24 py-2 rounded-lg mt-2 text-white ${
+                      className={`w-24 py-2 rounded-lg mt-1 text-sm text-white ${
                         adjustmentAmount && adjustmentReason.trim()
                           ? "bg-blue-500 hover:bg-blue-600 cursor-pointer"
                           : "bg-gray-300 cursor-not-allowed"
@@ -268,8 +268,8 @@ const PaymentPanel = ({
         )}
       </div>
       <div className="mb-10 px-5">
-        {/* 🔹 회원 선택 */}
-        {/* ✅ 회원 선택 */}
+        
+        {/* 회원 선택 */}
         <div className="flex justify-between items-center border border-gray-900 rounded-xl px-3 py-2.5">
             {selectedMember ? (
               <>
@@ -291,12 +291,72 @@ const PaymentPanel = ({
               </>
             )}
         </div>
+        
+        {/* 보유 포인트 */}
+        {selectedMember && (
+          <div className="flex justify-between items-center rounded-xl px-2 py-2.5 mt-2.5">
+            <label className="text-base font-500 text-gray-600">보유포인트</label>
+            <div className="text-gray-900 font-700 text-lg">
+              {selectedMember.points.toLocaleString()}p
+            </div>
+          </div>
+        )}
 
+        {/* 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
+        {selectedMember && (
+        <div className={`flex justify-between rounded-xl px-3 py-2.5 mt-2.5 ${
+          !selectedMember || selectedMember.points < 50000
+            ? "bg-gray-100 text-gray-200 cursor-not-allowed"
+            : "border border-gray-900 text-gray-950"
+          }`}
+        >
+          <span className="font-500 text-gray-600 white-space: nowrap;">포인트 사용</span>
+          <div className="flex font-700">
+          <input
+            type="number"
+            className="text-right bg-transparent w-28"
+            placeholder={`최대 ${maxUsablePoints.toLocaleString()}p`} // ✅ 최대 사용 가능 포인트 표시
+            value={usedPoints === 0 ? "" : usedPoints} // 0이면 입력창 비우기
+            onFocus={() => {
+              if (usedPoints === 0) setUsedPoints(""); // 포커스 시 0 삭제
+            }}
+            onBlur={() => {
+              if (usedPoints === "") setUsedPoints(0); // 입력값 없으면 0으로 복구
+            }}
+            onChange={(e) => {
+              let value = e.target.value.replace(/[^0-9]/g, ""); // 숫자 이외 문자 제거
+              if (value === "") {
+                setUsedPoints(""); // 값이 없으면 빈 문자열 유지
+                return;
+              }
+              
+              let numericValue = parseInt(value, 10);
+              if (isNaN(numericValue)) numericValue = 0;
+
+              if (numericValue > maxUsablePoints) {
+                setUsedPoints(maxUsablePoints); // ✅ 최대 사용 가능 포인트 초과 시 자동 조절
+              } else {
+                setUsedPoints(numericValue);
+              }
+            }}
+          />
+          {usedPoints > 0 && (
+            <span className="w-fit">p</span>
+          )}
+          </div>
+        </div>
+        )}
+
+        {/* 적립 예정 포인트 */}
+        {selectedMember && (
+          <div className="mt-2 mb-5 text-right text-gray-600">
+            <span className="font-400 text-sm">{earnedPoints.toLocaleString()}p 적립예정</span>
+          </div>
+        )}
         
 
         {/* 🔹 결제수단 선택 (라디오 버튼) */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-1">결제 수단</label>
           <div className="grid grid-cols-2 gap-2" >
             {["카드", "현금", "계좌이체", "미수금"].map((method) => (
               <label
@@ -327,46 +387,7 @@ const PaymentPanel = ({
 
         
 
-        {/* ✅ 보유 포인트 */}
-        {/* ✅ 회원이 선택된 경우에만 보유 포인트 표시 */}
-        {selectedMember && (
-          <div className="mb-4">
-            <label className="block text-gray-700 mb-1">보유포인트</label>
-            <div className="text-gray-900 font-bold text-lg">
-              {selectedMember.points.toLocaleString()}p
-            </div>
-          </div>
-        )}
-
-        {/* ✅ 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
-        {selectedMember && (
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1">포인트 사용</label>
-          <input
-            type="number"
-            className="border rounded-lg p-2 w-full text-right"
-            value={usedPoints}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (value < 0) return;
-              if (value > maxUsablePoints) {
-                setUsedPoints(maxUsablePoints); // 초과 입력 방지
-              } else {
-                setUsedPoints(value);
-              }
-            }}
-            disabled={!selectedMember || selectedMember.points < 50000} // 5만 미만이면 비활성화
-          />
-        </div>
-        )}
-
-        {/* ✅ 적립 예정 포인트 */}
-        {/* ✅ 회원이 선택된 경우에만 예상 포인트 표시 */}
-        {selectedMember && (
-          <div className="mb-4 text-right text-gray-700">
-            적립 예정 포인트: <span className="font-bold">{earnedPoints.toLocaleString()}p</span>
-          </div>
-        )}
+        
 
         {/* ✅ 결제 버튼 */}
         <button
