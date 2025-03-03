@@ -3,7 +3,6 @@ import { getProducts } from "../../api/products";
 import { fetchMemberInfo } from "../../api/members";
 import PaymentPanel from "./PaymentPanel";
 import { toast } from "react-toastify";
-import { useOutletContext } from "react-router-dom";
 
 const POS = (user) => {
   const [products, setProducts] = useState([]);
@@ -96,37 +95,28 @@ const POS = (user) => {
           ))}
         </div>
 
-        <div
-          className="flex flex-row flex-wrap sm:gap-3 md:gap-4 lg:gap-4"
-          // className="max-w-full h-fit grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] grid-rows-[repeat(auto-fit,minmax(180px,1fr))]  sm:gap-3 md:gap-4 lg:gap-4"
-          // className="max-w-full grid sm:gap-1 md:gap-2 lg:gap-10"
-          // style={{
-          //   display: "grid",
-          //   gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          //   gridAutoRows: "minmax(140px, auto)",
-          // }}
-        >
-            {products
-              .filter((product) =>
-                selectedCategory === "ETC" ? product.category === "ETC" : product.category === selectedCategory
-              )
-              .map((product) => (
-                <button
-                  key={product.id}
-                  disabled={product.stock === 0}
-                  className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-square ${
-                    product.stock === 0 ? "bg-gray-300 text-white cursor-not-allowed" : "bg-white"
-                  }`}
-                  onClick={() => addToCart(product)}
-                >
-                  <h3 className="sm:text-sm md:text-base lg:text-lg font-semibold text-left">{product.name}</h3>
-                  {product.stock === 0 ? (
-                    <p className="font-bold">품절</p>
-                  ) : (
-                    <p className="sm:text-sm md:text-lg lg:text-xl">{product.price.toLocaleString()}원</p>
-                  )}
-                </button>
-              ))}
+        <div className="flex flex-row flex-wrap sm:gap-3 md:gap-4 lg:gap-4">
+          {products
+            .filter((product) =>
+              selectedCategory === "ETC" ? product.category === "ETC" : product.category === selectedCategory
+            )
+            .map((product) => (
+              <button
+                key={product.id}
+                disabled={product.stock === 0}
+                className={`border p-4 rounded-xl shadow flex flex-col justify-between items-start sm:w-[140px] md:w-[160px] lg:w-[180px] aspect-square ${
+                  product.stock === 0 ? "bg-gray-300 text-white cursor-not-allowed" : "bg-white"
+                }`}
+                onClick={() => addToCart(product)}
+              >
+                <h3 className="sm:text-sm md:text-base lg:text-lg font-semibold text-left">{product.name}</h3>
+                {product.stock === 0 ? (
+                  <p className="font-bold">품절</p>
+                ) : (
+                  <p className="sm:text-sm md:text-lg lg:text-xl">{product.price.toLocaleString()}원</p>
+                )}
+              </button>
+            ))}
         </div>
       </div>
 

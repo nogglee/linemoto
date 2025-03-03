@@ -33,8 +33,8 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="flex w-full mt-4 px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
-      <div className="mt-20 px-4 md:px-[300px]">
+    <div className="flex w-full mt-4 sm:px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
+      <div className="mt-20 sm:px-4 md:px-[300px]">
         <h1 className="text-4xl font-semibold text-center mb-10">로그인</h1>
         <input
           type="text"

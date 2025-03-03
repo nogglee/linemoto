@@ -162,8 +162,8 @@ const PaymentPanel = ({
                 </div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-700 text-lg">{item.name}</span>
-                <span className="font-300 text-lg">{(item.price * item.quantity).toLocaleString()}</span>
+                <span className="font-700 text-gray-950 text-lg">{item.name}</span>
+                <span className="font-300 text-lg">{(item.price * item.quantity).toLocaleString()}원</span>
               </div>
             </div>
           ))
@@ -181,49 +181,50 @@ const PaymentPanel = ({
                   {adjustmentOpen ? "닫기" : "금액 조정"}
                 </button>
               )}
-              <span className="font-bold text-xl">총 {finalAmount.toLocaleString()}원</span>
+              <span className="font-bold text-gray-950 text-xl">총 {finalAmount.toLocaleString()}원</span>
               </div>
 
             {/* 🔹 결제금액 조정 UI */}
             {adjustmentOpen && (
-              <div className="mb-4 border p-3 rounded-lg bg-gray-100">
-                <div className="mb-2">
-                  <label className="block text-gray-700">조정 타입</label>
-                  <div className="flex space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="adjustmentType"
-                        checked={adjustmentType === "discount"}
-                        value="discount"
-                        onChange={() => setAdjustmentType("discount")}
-                        min="0"
-                        max={adjustmentType === "discount" ? maxDiscount : undefined}
-                      />
-                      <span>할인</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="adjustmentType"
-                        value="addition"
-                        checked={adjustmentType === "addition"}
-                        onChange={() => setAdjustmentType("addition")}
-                      />
-                      <span>추가</span>
-                    </label>
+              <div className="">
+                <div className="felx flex-row items-center gap-2  w-fit shrink-0">
+                  <div className="flex bg-gray-100 rounded-lg py-1 px-1 text-sm w-24">
+                    <button
+                      className={`flex-1 py-1 text-center rounded-lg transition ${
+                        adjustmentType === "discount" ? "bg-white shadow text-gray-800 font-600" : "text-gray-500 font-400"
+                      }`}
+                      onClick={() => setAdjustmentType("discount")}
+                    >
+                      할인
+                    </button>
+                    <button
+                      className={`flex-1 py-1 text-center rounded-lg transition ${
+                        adjustmentType === "addition" ? "bg-white shadow text-gray- font-600" : "text-gray-500 font-400"
+                      }`}
+                      onClick={() => setAdjustmentType("addition")}
+                    >
+                      추가
+                    </button>
                   </div>
-                </div>
-
-                <div className="mb-2">
-                  <label className="block text-gray-700">조정 금액</label>
                   <input
-                    type="number"
-                    className="border rounded-lg p-2 w-full text-right"
-                    value={adjustmentAmount}
-                    onChange={(e) => setAdjustmentAmount(e.target.value)}
-                  />
+                      type="number"
+                      className="p-2 w-24 text-right border-b border-gray-200"
+                      value={adjustmentAmount}
+                      onChange={(e) => setAdjustmentAmount(e.target.value)}
+                    />
+
+                  {/* <div className="flex items-center gap-2 justify-end">
+                    {adjustmentType === "discount" ? <MinusIcon /> : <PlusIcon />}
+                    <input
+                      type="number"
+                      className="p-2 text-right border-b border-gray-200"
+                      value={adjustmentAmount}
+                      onChange={(e) => setAdjustmentAmount(e.target.value)}
+                    />
+                  </div> */}
                 </div>
+                
+             
 
                 <div>
                   <label className="block text-gray-700">조정 사유</label>
@@ -246,9 +247,9 @@ const PaymentPanel = ({
 
             {/* 🔹 조정 금액 표시 */}
             {appliedAdjustment !== 0 && (
-              <div className="mb-2 text-gray-400 flex justify-between items-center">
+              <div className="text-gray-400 flex justify-between items-center">
                 <button
-                  className="text-gray-500 border border-gray-500 px-2.5 py-1 rounded-md text-sm"
+                  className="text-gray-500 border border-gray-500 hover:bg-gray-500 hover:text-white px-2.5 py-1 rounded-md text-sm"
                   onClick={removeAdjustment}
                 >
                   {appliedAdjustment < 0 ? "할인 취소" : "할증 취소"}

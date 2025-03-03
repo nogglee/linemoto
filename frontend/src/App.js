@@ -55,12 +55,17 @@ function App() {
 
   return (
     <Router>
-      {/* ✅ 관리자(admin)는 Header 숨김, 고객/비회원은 Header 표시 */}
-      {user?.role !== "admin" && <Header user={user} setUser={setUser} />}
+      {/* 관리자(admin)는 Header 숨김, 고객/비회원은 Header 표시 */}
+      {(user?.role !== "admin") && <Header user={user} setUser={setUser} />}
 
       <Routes>
-        {/* ✅ 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
-        {/* <Route path="/" element={!user ? <CategoryList /> : <Navigate to={`/${user.role}`} />} /> */}
+        {/* 기본 진입 페이지 (로그인 전: CategoryList, 로그인 후: role에 맞게 이동) */}
+        <Route path="/" element={user ? (user.role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/customer" replace />
+          ) : (
+            <CategoryList />
+          )
+        } />
+        
         <Route path="/" element={<CategoryList />} />
 
         {/* ✅ 상품 목록 페이지 (카테고리 선택 후 이동) */}
