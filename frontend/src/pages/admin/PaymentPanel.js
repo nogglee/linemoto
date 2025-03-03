@@ -222,17 +222,24 @@ const PaymentPanel = ({
                     value={adjustmentReason}
                     onChange={(e) => setAdjustmentReason(e.target.value)}
                   />
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex justify-end gap-2">
                     <input
                       type="number"
-                      className={`border-b border-gray-200 p-2 w-full ${
-                        adjustmentAmount ? "text-right" : "text-left"
-                      }`}
+                      className="border-b border-gray-200 py-2 pl-2 w-full"
                       placeholder={`${adjustmentType === "discount" ? "할인" : "할증"} 금액을 입력하세요`}
                       value={adjustmentAmount == 0 ? "" : adjustmentAmount}
                       onFocus={() => setAdjustmentAmount("")}
                       onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
-                      onChange={(e) => { const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); }}
+                      onChange={(e) => { 
+                        // const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); 
+                        let value = e.target.value.replace(/,/g, "");
+                        let numericValue = value ? parseInt(value, 10) : 0;
+                        
+                        if (adjustmentType === "discount" && numericValue > totalAmount) {
+                          numericValue = totalAmount; // ✅ 총 금액 초과 시 자동 조정
+                        }
+                        setAdjustmentAmount(numericValue);
+                      }}
                     />
                     <button
                       className={`w-24 py-2 rounded-lg mt-1 text-sm text-white ${
@@ -272,10 +279,10 @@ const PaymentPanel = ({
           </div>
         )}
       </div>
-      <div className="mb-10 px-5">
+      <div className="mb-6 px-5">
         
         {/* 회원 선택 */}
-        <div className="flex justify-between items-center border border-gray-900 rounded-xl px-3 py-2.5">
+        <div className="flex justify-between items-center border border-gray-900 rounded-xl px-3 py-2.5 mb-2.5">
             {selectedMember ? (
               <>
                 <span className="text-gray-900 font-semibold flex-1">{selectedMember.name}</span>
@@ -299,7 +306,7 @@ const PaymentPanel = ({
         
         {/* 보유 포인트 */}
         {selectedMember && (
-          <div className="flex justify-between items-center rounded-xl px-2 py-2.5 mt-2.5">
+          <div className="flex justify-between items-center rounded-xl px-2 py-2.5 mb-2.5">
             <label className="text-base font-500 text-gray-600">보유포인트</label>
             <div className="text-gray-900 font-700 text-lg">
               {selectedMember.points.toLocaleString()}p
@@ -309,8 +316,8 @@ const PaymentPanel = ({
 
         {/* 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
         {selectedMember && (
-        <div className={`flex justify-between rounded-xl px-3 py-2.5 mt-2.5 ${
-          !selectedMember || selectedMember.points < 50000
+        <div className={`flex justify-between rounded-xl px-3 py-2.5 mb-1.5 ${
+          !selectedMember || selectedMember.points < 50000  
             ? "bg-gray-100 text-gray-200 cursor-not-allowed"
             : "border border-gray-900 text-gray-950"
           }`}
@@ -354,7 +361,7 @@ const PaymentPanel = ({
 
         {/* 적립 예정 포인트 */}
         {selectedMember && (
-          <div className="mt-2 mb-5 text-right text-gray-600">
+          <div className="mb-5 text-right text-gray-600">
             <span className="font-400 text-sm">{earnedPoints.toLocaleString()}p 적립예정</span>
           </div>
         )}
@@ -366,8 +373,8 @@ const PaymentPanel = ({
             {["카드", "현금", "계좌이체", "미수금"].map((method) => (
               <label
                 key={method}
-                className={`border rounded-lg p-3 text-center cursor-pointer ${
-                  paymentMethod === method ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
+                className={`rounded-xl p-3 text-center cursor-pointer ${
+                  paymentMethod === method ? "bg-gray-950 text-white font-600" : "bg-gray-50 text-gray-500 hover:bg-gray-900 hover:text-white hover:font-600"
                 }`}
               >
                 <input
@@ -386,29 +393,18 @@ const PaymentPanel = ({
           </div>
         </div>
 
-        
-
-        
-
-        
-
-        
-
-        {/* ✅ 결제 버튼 */}
+        {/* 결제 버튼 */}
         <button
-          className="w-full bg-black text-white py-3 rounded-lg font-semibold flex justify-between items-center"
-          onClick={() => {
-            console.log("🛠 결제 버튼 클릭됨!");
-            console.log("🛠 handlePayment props 값:", handlePayment);
-            console.log("🔍 현재 관리자 정보(admin):", admin);          
-            handlePayment(paymentMethod)
-          }}
+          className="w-full bg-gray-950 text-white px-3 py-3 rounded-2xl font-semibold flex justify-center gap-2.5 items-center"
+          onClick={() => { handlePayment(paymentMethod) }}
           disabled={cartItems.length === 0} // 장바구니에 상품이 없으면 비활성화
         >
           {`${finalAmount.toLocaleString()}원 결제`}
-          <span className="bg-white text-black px-2 py-1 rounded-full text-sm">
-            {cartItems.length}
-          </span>
+            {cartItems.length > 0 && (
+              <span className="bg-white text-black w-6 aspect-square rounded-full text-sm">
+                  <p className="pt-[1px]">{totalQuantity}</p>
+              </span>
+            )}
         </button>
 
         {/* ✅ 회원 선택 모달 */}
