@@ -25,6 +25,7 @@ const PaymentPanel = ({
   const [adjustmentAmount, setAdjustmentAmount] = useState(0); 
   const [adjustmentReason, setAdjustmentReason] = useState("");
   const [appliedAdjustment, setAppliedAdjustment] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const maxDiscount = totalAmount; // 할인 최대 한도 = 상품 총 가격
@@ -86,30 +87,30 @@ const PaymentPanel = ({
 
   // 결제 핸들러
   const handlePayment = async (paymentMethod) => {
-  
-    const transactionData = {
-      admin_id: admin.id, 
-      admin_name: admin.name,
-      customer_id: selectedMember ? selectedMember.account_id : null,
-      total_amount: totalAmount,
-      discount: usedPoints,
-      adjustment: adjustmentAmount ? adjustedAmount : 0,
-      adjustment_reason: adjustmentReason.trim(),
-      final_amount: finalAmount,
-      earned_points: selectedMember ? earnedPoints : 0,
-      payment_method: paymentMethod,
-      items: cartItems.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-    };
+    if (isProcessing) return; 
+    setIsProcessing(true); 
+    try {
+      const transactionData = {
+        admin_id: admin.id, 
+        admin_name: admin.name,
+        customer_id: selectedMember ? selectedMember.account_id : null,
+        total_amount: totalAmount,
+        discount: usedPoints,
+        adjustment: adjustmentAmount ? adjustedAmount : 0,
+        adjustment_reason: adjustmentReason.trim(),
+        final_amount: finalAmount,
+        earned_points: selectedMember ? earnedPoints : 0,
+        payment_method: paymentMethod,
+        items: cartItems.map((item) => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+      };
 
-    const response = await submitTransaction(transactionData);
-    if (response) {
-      toast.success("결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
+      await submitTransaction(transactionData);
 
-      // UI 초기화
+      toast.success("✅ 결제가 완료되었습니다!", { position: "top-right", autoClose: 3000 });
       setCartItems([]);
       setUsedPoints(0);
       setSelectedMember(null);
@@ -118,6 +119,12 @@ const PaymentPanel = ({
       setAdjustmentReason("");
       setAdjustmentOpen(false);
       setAppliedAdjustment(0);
+    }
+    catch (error) {
+      console.error("❌ 결제 실패:", error);
+      toast.error("❌ 결제에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsProcessing(false); // ✅ 결제 완료 후 버튼 활성화
     }
   };
 
