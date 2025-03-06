@@ -24,23 +24,29 @@ router.post("/login", async (req, res) => {
 // 회원가입 엔드포인트 추가
 // 회원가입 엔드포인트 수정
 router.post("/signup", async (req, res) => {
-  console.log("회원가입 요청 시작:", new Date().toISOString());
+  console.log("🚀 회원가입 요청 시작:", new Date().toISOString());
+
   const { name, phone_number, birth } = req.body;
   const client = await pool.connect();
 
   try {
-    await client.query("BEGIN"); // 트랜잭션 시작
+    await client.query("BEGIN"); // 🔥 트랜잭션 시작
     console.log("📌 회원가입 요청 데이터:", req.body);
 
+    console.time("⏳ 중복 전화번호 체크");
     // 1️⃣ 중복 전화번호 체크
     const checkUser = await client.query(
       "SELECT id FROM users.accounts WHERE phone_number = $1",
       [phone_number]
     );
+    console.timeEnd("⏳ 중복 전화번호 체크");
+
     if (checkUser.rows.length > 0) {
+      console.warn("⚠️ 이미 등록된 전화번호:", phone_number);
       return res.status(400).json({ message: "이미 등록된 전화번호입니다." });
     }
 
+    console.time("⏳ accounts 테이블에 사용자 추가");
     // 2️⃣ `accounts` 테이블에 사용자 추가
     const accountResult = await client.query(
       `INSERT INTO users.accounts (name, phone_number, password, birthdate, role) 
@@ -48,10 +54,12 @@ router.post("/signup", async (req, res) => {
        RETURNING id, name, role`,
       [name, phone_number, birth, birth, "customer"]
     );
-    const newAccount = accountResult.rows[0];
+    console.timeEnd("⏳ accounts 테이블에 사용자 추가");
 
+    const newAccount = accountResult.rows[0];
     console.log("✅ 신규 계정 생성 완료:", newAccount);
 
+    console.time("⏳ members 테이블에 사용자 정보 추가");
     // 3️⃣ `members` 테이블에 사용자 정보 추가 (중복 방지)
     await client.query(
       `INSERT INTO users.members (account_id, name, phone_number)
@@ -59,16 +67,18 @@ router.post("/signup", async (req, res) => {
        ON CONFLICT (account_id) DO NOTHING;`,  // ✅ 중복 계정이면 무시
       [newAccount.id, name, phone_number]
     );
-    console.log("회원가입 처리 끝:", new Date().toISOString());
-    console.log("✅ 신규 회원 정보 추가 완료 (members 테이블)");
+    console.timeEnd("⏳ members 테이블에 사용자 정보 추가");
 
-    await client.query("COMMIT"); // 트랜잭션 커밋
+    console.log("✅ 회원가입 처리 완료:", new Date().toISOString());
+
+    await client.query("COMMIT"); // 🔥 트랜잭션 커밋
     res.status(201).json({ message: "회원가입 성공", user: newAccount });
 
   } catch (err) {
     await client.query("ROLLBACK"); // ❌ 오류 발생 시 롤백
-    console.error("❌ 회원가입 오류:", err);
+    console.error("❌ 회원가입 오류 발생:", err);
     res.status(500).json({ message: "서버 오류 발생", error: err.message });
+
   } finally {
     client.release(); // 🔥 DB 연결 해제
   }
