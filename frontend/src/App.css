@@ -71,6 +71,7 @@ input[type="checkbox"] {
   border: 1px solid #AAB0BB;
   border-radius: 2px;
   background-color: white;
+  cursor: pointer;
 }
 
 input[type="checkbox"]:checked {
@@ -87,10 +88,22 @@ input[type="checkbox"]:hover {
 }
 
 input,
-button:focus {
+button,
+select:focus {
   outline: none;
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 12px;
+  background-image: url('./assets/icons/ico-arrow-down.svg');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  /* 아이콘 위치 조정 */
+  background-size: 24px;
+}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;

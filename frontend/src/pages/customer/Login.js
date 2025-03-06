@@ -55,7 +55,7 @@ const Login = ({ setUser }) => {
           <label className="block font-500 text-sm text-gray-900">비밀번호</label>
           <input
             type="password"
-            placeholder="생년월일 6자리"
+            placeholder="생년월일 6자리를 입력하세요"
             className="w-full px-6 py-3 text-base text-gray-900 font-400 border border-gray-900 rounded-2xl placeholder:text-base placeholder:text-gray-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
