@@ -26,8 +26,8 @@ body,
   -ms-overflow-style: none;
 }
 
-.sidebar,
-.menubar,
+.sidebar::-webkit-scrollbar,
+.menubar ::-webkit-scrollbar,
 .payment-panel::-webkit-scrollbar {
   display: none;
 }
