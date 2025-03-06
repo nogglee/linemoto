@@ -95,7 +95,7 @@ const POS = (user) => {
           {categories.map((category) => (
             <button
               key={category}
-              className={`relative sm:py-1 md:py-2 lg:py-3 sm:px-4 md:px-5 lg:px-6 font-medium sm:text-base md:text-lg lg:text-xl whitespace-nowrap
+              className={`relative sm:py-1 md:py-2 lg:py-3 sm:px-3 md:px-3 lg:px-4 font-medium sm:text-base md:text-lg lg:text-xl whitespace-nowrap
                 ${selectedCategory === category ? "text-gray-950 font-bold" : "text-gray-500 hover:text-gray-900"}`}
               onClick={() => setSelectedCategory(category)}
             >
