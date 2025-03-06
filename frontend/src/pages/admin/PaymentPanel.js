@@ -260,12 +260,12 @@ const PaymentPanel = ({
                       onFocus={() => setAdjustmentAmount("")}
                       onBlur={(e) => { if (e.target.value === 0) setAdjustmentAmount(0) }}
                       onChange={(e) => { 
-                        // const value = e.target.value.replace(/,/g, ""); setAdjustmentAmount(value ? parseInt(value, 10) : ""); 
+                        
                         let value = e.target.value.replace(/,/g, "");
                         let numericValue = value ? parseInt(value, 10) : 0;
                         
                         if (adjustmentType === "discount" && numericValue > totalAmount) {
-                          numericValue = totalAmount; // ✅ 총 금액 초과 시 자동 조정
+                          numericValue = totalAmount; 
                         }
                         setAdjustmentAmount(numericValue);
                       }}
@@ -273,7 +273,7 @@ const PaymentPanel = ({
                     <button
                       className={`w-24 py-2 rounded-lg mt-1 text-sm text-white ${
                         adjustmentAmount && adjustmentReason.trim()
-                          ? "bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                          ? "bg-gray-700 hover:bg-gray-950 cursor-pointer"
                           : "bg-gray-300 cursor-not-allowed"
                       }`}
                       onClick={applyAdjustment}

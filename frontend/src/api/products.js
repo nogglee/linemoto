@@ -14,7 +14,7 @@ export const addProduct = async ({ name, price, stock, category, image_url }) =>
 
     return response.data;
   } catch (error) {
-    console.error("❌ 상품 추가 실패:", error);
+    // console.error("❌ 상품 추가 실패:", error);
     return null;
   }
 };
@@ -26,7 +26,7 @@ export const getCategories = async () => {
   const { data, error } = await supabase.rpc("get_categories");
 
   if (error) {
-    console.error("❌ 카테고리 목록 불러오기 오류:", error.message);
+    // console.error("❌ 카테고리 목록 불러오기 오류:", error.message);
     return [];
   }
 
@@ -36,14 +36,14 @@ export const getCategories = async () => {
 // 특정 카테고리 상품 가져오기 (고객 페이지 전용 API)
 export const getProductsByCategory = async (category) => {
   try {
-    console.log(`🛠 [${category}] 카테고리 상품 가져오기 시작`);
+    // console.log(`🛠 [${category}] 카테고리 상품 가져오기 시작`);
 
     const response = await apiClient.get(`/products/category/${encodeURIComponent(category)}`);
-    console.log(`🛠 [${category}] 가져온 상품 데이터:`, response.data);
+    // console.log(`🛠 [${category}] 가져온 상품 데이터:`, response.data);
     
     return response.data;
   } catch (error) {
-    console.error(`❌ [${category}] 카테고리 상품 불러오기 오류:`, error.message);
+    // console.error(`❌ [${category}] 카테고리 상품 불러오기 오류:`, error.message);
     return [];
   }
 };
@@ -62,7 +62,7 @@ export const getProducts = async () => {
 
     return formattedData;
   } catch (error) {
-    console.error("❌ 상품 목록 가져오기 실패:", error);
+    // console.error("❌ 상품 목록 가져오기 실패:", error);
     return [];
   }
 };
@@ -85,12 +85,12 @@ export const updateProduct = async (productId, updateData) => {
     };
     delete formattedData.imageUrl; // ✅ 불필요한 필드 삭제
 
-    console.log("🛠 업데이트 요청 데이터 (수정됨):", formattedData); // 확인용
+    // console.log("🛠 업데이트 요청 데이터 (수정됨):", formattedData); // 확인용
 
     const response = await apiClient.put(`/products/${productId}`, formattedData);
     return response.data;
   } catch (error) {
-    console.error("❌ 상품 수정 실패:", error);
+    // console.error("❌ 상품 수정 실패:", error);
   }
 };
 
@@ -103,7 +103,7 @@ export const deleteProducts = async (productIds) => {
     const responses = await Promise.all(promises);
     return responses.map(response => response.data);
   } catch (error) {
-    console.error("❌ 상품 삭제 오류:", error);
+    // console.error("❌ 상품 삭제 오류:", error);
     throw error;
   }
 };
@@ -113,7 +113,7 @@ export const getDefaultImageUrl = () => {
   const { data } = getSupabaseClient().storage.from("product-images").getPublicUrl("default.png");
 
   console.log("🛠 Default Image URL:", data?.publicUrl); // 🔥 확인용 로그
-  return data?.publicUrl || "/default.png"; // URL이 없으면 로컬 기본 이미지
+  return data?.publicUrl || "/images/DEFAULT.png"; // URL이 없으면 로컬 기본 이미지
 };
 
 const sanitizeFileName = (fileName) => {
@@ -150,5 +150,40 @@ export const updateProductStock = async (productId, quantityChange) => {
     console.log(`✅ 상품 ID: ${productId}, 재고 ${quantityChange} 차감 성공`);
   } catch (error) {
     console.error(`❌ 재고 차감 실패:`, error);
+  }
+};
+
+// 상품 이미지 삭제
+export const deleteProductImage = async (productId) => {
+  try {
+    await apiClient.delete(`/products/${productId}/deleteImage`);
+    return true;
+  } catch (error) {
+    console.error("❌ 이미지 삭제 실패:", error);
+    return false;
+  }
+};
+
+export const updateProductImage = async (productId, file) => {
+  try {
+    const sanitizedFileName = sanitizeFileName(`${Date.now()}-${file.name}`); // ✅ 날짜 기반 파일명
+    const { data, error } = await getSupabaseClient().storage
+      .from("product-images")
+      .upload(sanitizedFileName, file, {
+        upsert: true, // ✅ 기존 파일 덮어쓰기 허용
+      });
+
+    if (error) {
+      console.error("이미지 업로드 실패:", error);
+      return null;
+    }
+
+    // ✅ 업로드된 이미지의 퍼블릭 URL 반환
+    const imageUrl = `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/product-images/${sanitizedFileName}`;
+
+    return imageUrl;
+  } catch (error) {
+    console.error("❌ 이미지 업데이트 실패:", error);
+    return null;
   }
 };
