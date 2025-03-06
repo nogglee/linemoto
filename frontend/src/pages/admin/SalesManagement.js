@@ -11,6 +11,7 @@ dayjs.extend(timezone);
 const SalesManagement = ({ admin }) => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
 
   // 집계 데이터 상태
   const [salesByPayment, setSalesByPayment] = useState({});
@@ -18,79 +19,108 @@ const SalesManagement = ({ admin }) => {
   const [topSellingProducts, setTopSellingProducts] = useState([]);
 
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    console.log("📌 현재 sales 상태:", sales);
+  }, [sales]);
 
   useEffect(() => {
-    if (!admin) {
+    if (admin === undefined) return; // ✅ undefined 상태일 때는 아무 동작도 하지 않음
+  if (!admin) {
+      console.warn("❌ 관리자 정보 없음, 로그인 페이지로 이동");
       navigate("/login");
       return;
     }
 
+    console.log("📌 fetchAdminSales 호출 - admin_id:", admin?.id); // ✅ admin.id 값 확인
+
     const loadSalesData = async () => {
       setLoading(true);
-      const data = await fetchAdminSales(admin.id);
-      setSales(data);
+      setError(null); // ✅ 기존 오류 초기화
 
-      // 집계 데이터 계산
-      const byPayment = {};
-      const productMap = {};
-      
-      // 날짜별 집계: 오늘, 이번 주, 이번 달, 이번 년도 (KST 기준)
-      let todaySum = 0,
-          weekSum = 0,
-          monthSum = 0,
-          yearSum = 0;
-      const now = dayjs().tz("Asia/Seoul");
-      const startOfToday = now.startOf("day");
-      const startOfWeek = now.startOf("week");
-      const startOfMonth = now.startOf("month");
-      const startOfYear = now.startOf("year");
-
-      data.forEach((sale) => {
-        // 결제수단별 집계
-        const pm = sale.payment_method || "기타";
-        byPayment[pm] = (byPayment[pm] || 0) + parseFloat(sale.final_amount);
-
-        // 날짜별 집계
-        const saleDate = dayjs.utc(sale.created_at).tz("Asia/Seoul");
-        const finalAmt = parseFloat(sale.final_amount);
-        if (saleDate.isSame(startOfToday, "day")) {
-          todaySum += finalAmt;
-        }
-        if (saleDate.isAfter(startOfWeek)) {
-          weekSum += finalAmt;
-        }
-        if (saleDate.isAfter(startOfMonth)) {
-          monthSum += finalAmt;
-        }
-        if (saleDate.isAfter(startOfYear)) {
-          yearSum += finalAmt;
+      try {
+        if (!admin?.id) {
+          throw new Error("관리자 ID가 없습니다.");
         }
 
-        // 판매량 높은 상품 집계 (상품명 기준)
-        sale.items.forEach((item) => {
-          productMap[item.name] = (productMap[item.name] || 0) + item.quantity;
-        });
-      });
+        console.log("🛠 API 요청 시작: GET /transactions/sales/" + admin.id);
+        const data = await fetchAdminSales(admin.id);
+        console.log("✅ API 응답 수신:", data);
 
-      setSalesByPayment(byPayment);
-      setSalesByDate({
-        "오늘": todaySum,
-        "이번 주": weekSum,
-        "이번 달": monthSum,
-        "이번 년도": yearSum,
-      });
+        if (!data || data.length === 0) {
+          console.warn("⚠️ 불러온 매출 데이터가 없습니다.");
+        }
 
-      const topProducts = Object.entries(productMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([name, quantity]) => ({ name, quantity }));
-      setTopSellingProducts(topProducts);
-
-      setLoading(false);
+        setSales(data);
+        processSalesData(data);
+      } catch (err) {
+        console.error("❌ 매출 데이터 조회 실패:", err);
+        setError("매출 데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadSalesData();
   }, [admin, navigate]);
+  const processSalesData = (data) => {
+    // 결제수단별 집계
+    const byPayment = {};
+    const productMap = {};
+
+    // 날짜별 집계: 오늘, 이번 주, 이번 달, 이번 년도 (KST 기준)
+    let todaySum = 0,
+      weekSum = 0,
+      monthSum = 0,
+      yearSum = 0;
+
+    const now = dayjs().tz("Asia/Seoul");
+    const startOfToday = now.startOf("day");
+    const startOfWeek = now.startOf("week");
+    const startOfMonth = now.startOf("month");
+    const startOfYear = now.startOf("year");
+
+    data.forEach((sale) => {
+      const pm = sale.payment_method || "기타";
+      byPayment[pm] = (byPayment[pm] || 0) + parseFloat(sale.final_amount);
+
+      const saleDate = dayjs.utc(sale.created_at).tz("Asia/Seoul");
+      const finalAmt = parseFloat(sale.final_amount);
+
+      if (saleDate.isSame(startOfToday, "day")) {
+        todaySum += finalAmt;
+      }
+      if (saleDate.isAfter(startOfWeek)) {
+        weekSum += finalAmt;
+      }
+      if (saleDate.isAfter(startOfMonth)) {
+        monthSum += finalAmt;
+      }
+      if (saleDate.isAfter(startOfYear)) {
+        yearSum += finalAmt;
+      }
+
+      // 판매량 높은 상품 집계 (상품명 기준)
+      sale.items.forEach((item) => {
+        productMap[item.name] = (productMap[item.name] || 0) + item.quantity;
+      });
+    });
+
+    setSalesByPayment(byPayment);
+    setSalesByDate({
+      오늘: todaySum,
+      "이번 주": weekSum,
+      "이번 달": monthSum,
+      "이번 년도": yearSum,
+    });
+
+    const topProducts = Object.entries(productMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, quantity]) => ({ name, quantity }));
+
+    setTopSellingProducts(topProducts);
+  };
 
   // UTC → KST 변환 함수
   const convertToKST = (utcDate) => {

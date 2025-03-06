@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../api/auth";
 import { showToast } from "../common/components/Toast";
+import { getAdminStoreId } from "../../api/transactions";
+
 
 const Login = ({ setUser }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -11,22 +13,34 @@ const Login = ({ setUser }) => {
   const handleLogin = async () => {
     try {
       const userData = await login(phoneNumber, password);
+  
       if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData.data));
+        setUser(userData.data); // 상태 업데이트
 
-        localStorage.setItem("user", JSON.stringify(userData.data)); // ✅ user.data만 저장
+        setTimeout(async () => {
+          if (userData.data.user.role === "admin") {
+            // ✅ getAdminStoreId 호출 후 response 저장
+            const response = await getAdminStoreId(userData.data.user.id);
+            
+            if (response && response.store_id) {
+              const storeId = response.store_id;
+              localStorage.setItem("selected_store_id", storeId); // ✅ 스토어 ID 저장
+              console.log("📌 로그인 후 selected_store_id:", storeId);
 
-        setUser(userData.data); // ✅ 상태 업데이트 보장
-
-        showToast(`또 오셨네요 ${userData.data.name || ""} 라이더님!`, "success");
-
-        // ✅ 로그인 성공 후 즉시 이동
-        if (userData.data.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/", { replace: true }); // 고객은 상품 리스트 유지
-        }
+              showToast(`환영합니다 ${userData.data.user.name || ""} 관리자님!`, "success");
+              navigate(`/admin/pos?store_id=${storeId}`, { replace: true }); // ✅ 수정된 부분
+            } else {
+              showToast("관리 가능한 매장이 없습니다.", "error");
+            }
+          } else {
+            showToast(`또 오셨네요 ${userData.data.user.name || ""} 라이더님!`, "success");
+            navigate("/", { replace: true });
+          }
+        }, 500);
       }
     } catch (error) {
+      // console.error("❌ 로그인 실패:", error);
       showToast("로그인에 실패했어요 😞", "error");
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import { fetchMembers } from "../../api/members";
-import { submitTransaction } from "../../api/transactions";
+import { submitTransaction, getAdminStoreId } from "../../api/transactions";
 import SelectMemberModal from "./components/SelectMemeberModal";
 import { showToast } from "../common/components/Toast";
 import { ReactComponent as MinusIcon } from "../../assets/icons/ico-minus.svg";
@@ -32,6 +32,12 @@ const PaymentPanel = ({
   
   const adjustmentInputRef = useRef(null); 
   const pointInputRef = useRef(null);
+
+  // localStorage에서 admin 정보 가져오기
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  const accountId = storedUser?.user?.id; // accounts.account_id
+  const [adminId, setAdminId] = useState(null); // admins.id로 변환
+  const [storeId, setStoreId] = useState(null); // admins_stores.store_id
   
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const maxDiscount = totalAmount; // 할인 최대 한도 = 상품 총 가격
@@ -47,6 +53,22 @@ const PaymentPanel = ({
   const maxUsablePoints = Math.min(selectedMember?.points || 0, finalAmountBeforePoints); // 최대 사용 가능 
   const earnedPoints = selectedMember && finalAmount >= 10000 ? Math.floor(finalAmount * 0.05) : 0;
 
+  useEffect(() => {
+    const fetchAdminDetails = async () => {
+      if (accountId) {
+        try {
+          const response = await getAdminStoreId(accountId); // 새 API 호출
+          setAdminId(response.admin_id); // admins.id
+          setStoreId(response.store_id); // shops.stores.id
+        } catch (error) {
+          console.error("❌ 관리자 및 스토어 정보 불러오기 실패:", error);
+          showToast("관리자 정보 로드 실패. 다시 로그인해 주세요.", "fail");
+        }
+      }
+    };
+    fetchAdminDetails();
+  }, [accountId]);
+  
   // 회원 선택 시 포인트 사용 초기화
   useEffect(() => {
     setUsedPoints(0);
@@ -122,10 +144,18 @@ const PaymentPanel = ({
   const handlePayment = async (paymentMethod) => {
     if (isProcessing) return; 
     setIsProcessing(true); 
+
+    const storeId = localStorage.getItem("selected_store_id");
+    if (!storeId) {
+      showToast("선택된 매장이 없습니다.", "fail");
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       const transactionData = {
-        admin_id: admin.id, 
-        admin_name: admin.name,
+        admin_id: adminId, // admins.id
+        admin_name: storedUser?.user?.name || admin.name,
         customer_id: selectedMember ? selectedMember.account_id : null,
         total_amount: totalAmount,
         discount: usedPoints,
@@ -134,6 +164,7 @@ const PaymentPanel = ({
         final_amount: finalAmount,
         earned_points: selectedMember ? earnedPoints : 0,
         payment_method: paymentMethod,
+        store_id: storeId, // shops.stores.id
         items: cartItems.map((item) => ({
           product_id: item.id,
           quantity: item.quantity,

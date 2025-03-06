@@ -2,19 +2,20 @@ import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {ReactComponent as Logo } from "../../assets/icons/logo.svg"
 
-const Header = () => {
+const Header = ({ setUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem("user")); // 사용자 정보 가져오기
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null; // null 가능성 허용
   const isLoggedIn = !!user;
-  const isAdmin = user?.role === "admin";
-  const userName = user?.name || "";
-
-  console.log("🛠 현재 로그인 유저:", user); // 🔥 role 확인 로그 추가
-
+  const isAdmin = user?.user?.role === "admin"; // 안전한 접근
+  const userName = user?.user?.name || "";
+  
   const handleLogout = () => {
     localStorage.removeItem("user");
-    navigate("/"); // 로그아웃 후 메인페이지 이동
+    localStorage.removeItem("selected_store_id"); 
+    setUser(null);
+    navigate("/", { replace: true }); // 로그아웃 후 메인페이지 이동
   };
 
   return (

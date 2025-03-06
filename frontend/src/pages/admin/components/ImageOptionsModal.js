@@ -49,16 +49,19 @@ const ImageOptionsModal = ({ isOpen, onClose, position, isDefaultImage, productI
   // 이미지 업로드 처리
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {
+      console.error("❌ 파일이 선택되지 않았습니다.");
+      return;
+    }
+
+    console.log("📌 업로드할 파일:", file);
 
     try {
       const imageUrl = await updateProductImage(productId, file); // ✅ 기존 상품 이미지 업데이트
-
       if (imageUrl) {
         onUpdateImage(imageUrl); // 부모 상태 업데이트
+        onClose();
       }
-
-      onClose(); // 모달 닫기
     } catch (error) {
       console.error("이미지 업로드/업데이트 오류:", error);
     }

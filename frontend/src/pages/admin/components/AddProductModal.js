@@ -7,7 +7,8 @@ const getDefaultImageUrl = () => {
   return `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/product-images/default.png`;
 };
 
-const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addProduct, setCategories }) => {
+const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addProduct, setCategories, fetchProducts }) => {
+  // console.log("✅ AddProductModal props:", { isOpen, onClose, onAdd, categories, setProducts, addProduct, setCategories });
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -34,6 +35,13 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addP
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("🛠 [handleSubmit 실행됨] 상품 추가 요청 시작");
+  console.log("📌 onAdd 존재 여부:", onAdd);
+
+  if (!onAdd) {
+    console.error("❌ onAdd 함수가 존재하지 않습니다.");
+    return;
+  }
 
     if (!newProduct.name) {
       showToast("상품명을 입력해 주세요!", "fail");
@@ -50,36 +58,55 @@ const AddProductModal = ({ isOpen, onClose, onAdd, categories, setProducts, addP
       return;
     }
     
+    const storeId = localStorage.getItem("selected_store_id");
+    if (!storeId) {
+        console.error("❌ store_id가 없습니다.");
+        showToast("스토어 정보를 찾을 수 없습니다.", "fail");
+        return;
+    }
+
     try {
       let imageUrl = getDefaultImageUrl();
 
       if (newProduct.imageFile) {
-        const uploadedImageUrl = await uploadImage(newProduct.imageFile);
-        if (uploadedImageUrl) {
-          imageUrl = `${uploadedImageUrl}?timestamp=${Date.now()}`; // ✅ 캐싱 방지
-        }
+          console.log("📌 이미지 업로드 시작...");
+          const uploadedImageUrl = await uploadImage(newProduct.imageFile);
+          if (uploadedImageUrl) {
+              imageUrl = `${uploadedImageUrl}?timestamp=${Date.now()}`;
+          }
+          console.log("✅ 이미지 업로드 완료:", imageUrl);
       }
+
 
       const formattedProduct = {
-        name: newProduct.name,
-        price: parseInt(newProduct.price, 10),
-        stock: newProduct.stock ? parseInt(newProduct.stock, 10) : 0,
-        category: newProduct.category,
-        image_url: imageUrl,
+          name: newProduct.name,
+          price: parseInt(newProduct.price, 10),
+          stock: newProduct.stock ? parseInt(newProduct.stock, 10) : 0,
+          category: newProduct.category,
+          image_url: imageUrl,
+          store_id: parseInt(storeId, 10)
       };
-      
-      const addedProduct = await addProduct(formattedProduct); // ✅ 상품 추가 API 호출
+
+      console.log("📌 [addProduct 호출] 요청 데이터:", formattedProduct);
+      const addedProduct = await onAdd(formattedProduct);
+
+      console.log("📌 [addProduct 응답 확인]:", addedProduct);
 
       if (addedProduct) {
-        setProducts((prevProducts) => [addedProduct, ...prevProducts]); // ✅ 리스트 맨 위에 추가
-      }
+          console.log("✅ 상품 추가 완료:", addedProduct);
+          setProducts((prevProducts) => [addedProduct, ...prevProducts]);
+          showToast("상품이 추가되었습니다!", "success");
+          onClose();
 
-      setNewProduct({ name: '', price: '', stock: '', category: '', imageFile: null });
-      showToast("상품이 추가되었습니다!", "success");      
-      onClose();
-    } catch (error) {
-      showToast("상품 추가 중 오류가 발생했습니다.", "fail");      
-    }
+          fetchProducts();
+      } else {
+          console.error("❌ addProduct 호출 후 응답이 없음");
+          showToast("상품 추가 중 오류가 발생했습니다.", "fail");
+      }
+  } catch (error) {
+      console.error("❌ 상품 추가 중 오류:", error);
+      showToast("상품 추가 중 오류가 발생했습니다.", "fail");
+  }
   };
 
   return (

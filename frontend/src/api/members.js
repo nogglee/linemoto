@@ -4,7 +4,6 @@ import apiClient from "./index";
 export const fetchMembers = async () => {
   try {
     const response = await apiClient.get("/members");
-    console.log("fetchMembers response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch members:", error.response?.data || error.message);
@@ -16,7 +15,6 @@ export const fetchMembers = async () => {
 export const fetchMemberInfo = async (memberId) => {
   try {
     const response = await apiClient.get(`/members/${memberId}`);
-    console.log("fetchMemberInfo response:", response.data);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch member ${memberId}:`, error.response?.data || error.message);
@@ -31,7 +29,6 @@ export const updateMemberPoints = async (memberId, points, reason) => {
       points,
       reason,
     });
-    console.log("updateMemberPoints response:", response.data);
     return response.data;
   } catch (error) {
     console.error(`Failed to update points for member ${memberId}:`, error.response?.data || error.message);
@@ -45,7 +42,6 @@ export const fetchMemberTransactions = async (memberId) => {
   try {
     console.log("🚀 요청 보냄: /members/" + memberId + "/transactions");
     const response = await apiClient.get(`/members/${memberId}/transactions`);
-    console.log("fetchMemberTransactions response:", response.data);
     return response.data;
   } catch (error) {
     console.error(`Failed to fetch transactions for member ${memberId}:`, error.response?.data || error.message);
@@ -76,19 +72,39 @@ export const payArrears = async (memberId, paymentMethod) => {
   }
 };
 
+// export const fetchMyPageData = async (accountId) => {
+//   if (!accountId) {
+//     console.error("❌ fetchMyPageData 호출 실패: accountId가 없습니다!");
+//     return null;
+//   }
+//   console.log("🔥 fetchMyPageData 함수 실행됨!", accountId);
+//   try {
+//     const response = await apiClient.get(`/members/mypage/${accountId}`);
+//     console.log("✅ fetchMyPageData 응답:", response.data); // ✅ 응답 확인
+//     if (response.data.member) {
+//       console.log("🛠 회원 정보:", response.data.member);
+//     }
+
+//     if (response.data.transactions) {
+//       console.log("🚀 거래 내역 데이터 있음:", response.data.transactions);
+//       console.log("🔥 fetchMemberTransactions 함수 실행됨!", accountId);
+//     }
+//     return response.data;
+//   } catch (error) {
+//     console.error("❌ MyPage 데이터 불러오기 실패:", error.response?.data || error.message);
+//     return null;
+//   }
+// };
 export const fetchMyPageData = async (accountId) => {
-  console.log("🔥 fetchMyPageData 함수 실행됨!", accountId);
+  if (!accountId) {
+    console.error("❌ fetchMyPageData 호출 실패: accountId가 없습니다! (전달된 값:", accountId, ")");
+    return null;
+  }
+
+  console.log("🔥 fetchMyPageData 함수 실행됨! accountId:", accountId);
   try {
     const response = await apiClient.get(`/members/mypage/${accountId}`);
-    console.log("✅ fetchMyPageData 응답:", response.data); // ✅ 응답 확인
-    if (response.data.member) {
-      console.log("🛠 회원 정보:", response.data.member);
-    }
-
-    if (response.data.transactions) {
-      console.log("🚀 거래 내역 데이터 있음:", response.data.transactions);
-      console.log("🔥 fetchMemberTransactions 함수 실행됨!", accountId);
-    }
+    console.log("✅ fetchMyPageData 응답:", response.data);
     return response.data;
   } catch (error) {
     console.error("❌ MyPage 데이터 불러오기 실패:", error.response?.data || error.message);

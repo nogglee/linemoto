@@ -2,34 +2,65 @@ import React, { useEffect, useState } from "react";
 import { fetchMyPageData  } from "../../api/members";
 import { useNavigate } from "react-router-dom";
 
-const MyPage = ({ user }) => {
+const MyPage = () => {
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser).user : null;
+  const accountId = user?.id;  // ✅ account_id를 직접 가져오기
   const [transactions, setTransactions] = useState([]);
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login");
+    if (!accountId) {
+      console.error("❌ MyPage: accountId가 없습니다.");
+      navigate("/login");  // ✅ 로그인 안 되어 있으면 로그인 페이지로 이동
       return;
     }
 
-    console.log("🚀 MyPage 데이터 요청 시작 - user.id:", user.id);
+    console.log("🚀 MyPage 데이터 요청 시작 - accountId:", accountId);
+    fetchMyPageData(accountId)
+      .then((data) => {
+        if (data) {
+          console.log("✅ MyPage 데이터 로드 완료:", data);
+          setMember(data.member);
+          setTransactions(data.transactions);
+        }
+      })
+      .catch((error) => {
+        console.error("❌ MyPage 데이터 로드 실패:", error);
+      });
+  }, [accountId, navigate]);
 
-    // ✅ 회원 정보 및 결제 내역 불러오기
-    const loadMyPageData = async () => {
-      setLoading(true);
-      const data = await fetchMyPageData(user.id);
-      console.log("🔥 fetchMyPageData 응답:", data);
-      if (data) {
-        setMember(data.member);
-        setTransactions(data.transactions);
-      }
-      setLoading(false);
-    };
 
-    loadMyPageData();
-  }, [user, navigate]);
+// const MyPage = ({ user }) => {
+//   const [transactions, setTransactions] = useState([]);
+//   const [member, setMember] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const navigate = useNavigate();
+  
+//   useEffect(() => {
+//     if (!user) {
+//       navigate("/login");
+//       return;
+//     }
+
+//     console.log("🚀 MyPage 데이터 요청 시작 - user.id:", user.id);
+
+//     // ✅ 회원 정보 및 결제 내역 불러오기
+//     const loadMyPageData = async () => {
+//       setLoading(true);
+//       const data = await fetchMyPageData(user.id);
+//       console.log("🔥 fetchMyPageData 응답:", data);
+//       if (data) {
+//         setMember(data.member);
+//         setTransactions(data.transactions);
+//       }
+//       setLoading(false);
+//     };
+
+//     loadMyPageData();
+//   }, [user, navigate]);
 
   const convertToKST = (utcDate) => {
     if (!utcDate) return "시간 정보 없음"; // 값이 없으면 기본값 처리
@@ -57,6 +88,7 @@ const MyPage = ({ user }) => {
             transactions.map((txn) => {
               const adjustment = txn.adjustment ? parseFloat(txn.adjustment) : 0;
               const adjustmentReason = txn.adjustment_reason ?? ""; // 🚀 조정 사유 기본값
+              const storeName = txn.store_name ?? "매장 정보 없음"; // 🚀 매장 정보 기본값
 
               return(
                 <div key={txn.id} className="p-4 bg-white rounded-lg shadow">
@@ -74,6 +106,7 @@ const MyPage = ({ user }) => {
                     <p>사용 포인트: <span className="text-red-500">{Math.floor((txn.discount ?? 0)).toLocaleString()}p</span></p>
                     <p>적립 포인트: <span className="text-green-500">{Math.floor((txn.earned_points ?? 0)).toLocaleString()}p</span></p>
                     <p>결제 수단: <span className="text-gray-600">{txn.payment_method || "정보 없음"}</span></p>
+                  <p>결제장소: <span className="">{txn.store_name}</span></p>
                     <p className="text-gray-500 text-sm">{convertToKST(txn.created_at)}</p>
                     
                     {/* ✅ 조정 금액 & 사유 (조정 금액이 0이 아닐 때만 출력) */}
@@ -86,7 +119,6 @@ const MyPage = ({ user }) => {
                         {adjustmentReason && (
                           <p className="text-gray-600 text-sm mt-1">사유: {adjustmentReason}</p>
                         )}
-                        {/* <p>관리자: <span className="text-gray-700">{txn.admin_name || "없음"}</span></p> */}
                       </div>
                     )}
                   </div>

@@ -28,14 +28,34 @@ const ProductManagement = () => {
     isDefaultImage: false,
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
+  const fetchProducts = async () => {
+    const storeId = localStorage.getItem("selected_store_id");
+    if (!storeId) {
+      console.error("❌ store_id가 설정되지 않았습니다.");
+      return;
+    }
+  
+    try {
+      const data = await getProducts(storeId); // ✅ store_id 추가
       setProducts(data);
       setCategories([...new Set(data.map((item) => item.category))]); // 중복 제거된 카테고리 목록
-    };
+    } catch (error) {
+      console.error("❌ 상품 조회 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+  
     fetchProducts();
   }, []);
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     const data = await getProducts();
+  //     setProducts(data);
+  //     setCategories([...new Set(data.map((item) => item.category))]); // 중복 제거된 카테고리 목록
+  //   };
+  //   fetchProducts();
+  // }, []);
 
   // 상품 추가
   const handleAddProduct = async (newProduct) => {
@@ -43,8 +63,11 @@ const ProductManagement = () => {
       const addedProduct = await addProduct(newProduct);
       if (addedProduct) {
         setProducts((prev) => [...prev, addedProduct]);
+        // await fetchProducts();  
         setIsAddModalOpen(false);
       }
+
+      return addedProduct;
     } catch (error) {
       console.error("상품 추가 실패:", error);
     }
@@ -199,7 +222,14 @@ const ProductManagement = () => {
       </table>
 
       {/* 모달들 */}
-      <AddProductModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddProduct} categories={categories} />
+      <AddProductModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onAdd={handleAddProduct} 
+        categories={categories} 
+        setProducts={setProducts}
+        fetchProducts={fetchProducts}
+      />
       <DeleteProductModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onDelete={confirmDelete} productNames={productNames} />
       {imageOptions.isOpen && (
         <ImageOptionsModal
