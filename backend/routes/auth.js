@@ -24,12 +24,14 @@ router.post("/login", async (req, res) => {
 // 회원가입 엔드포인트 추가
 // 회원가입 엔드포인트 수정
 router.post("/signup", async (req, res) => {
+  console.log("회원가입 요청 시작:", new Date().toISOString());
   const { name, phone_number, birth } = req.body;
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN"); // 트랜잭션 시작
     console.log("📌 회원가입 요청 데이터:", req.body);
+    console.log(response.timeStamp);
 
     // 1️⃣ 중복 전화번호 체크
     const checkUser = await client.query(
@@ -58,7 +60,7 @@ router.post("/signup", async (req, res) => {
        ON CONFLICT (account_id) DO NOTHING;`,  // ✅ 중복 계정이면 무시
       [newAccount.id, name, phone_number]
     );
-
+    console.log("회원가입 처리 끝:", new Date().toISOString());
     console.log("✅ 신규 회원 정보 추가 완료 (members 테이블)");
 
     await client.query("COMMIT"); // 트랜잭션 커밋
