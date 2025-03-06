@@ -3,8 +3,14 @@ import { getCategories } from "../../api/products";
 import { useNavigate } from "react-router-dom";
 
 const categoryImageMap = {
-  "엔진오일": "OIL",
-  "거치대/케이스": "CRADLE"
+  "엔진오일": "/images/OIL.png",
+  "거치대/케이스": "/images/CRADLE.png",
+  "ETC": "/images/ETC.png",
+  "ADV350": "/images/ADV350.png",
+  "FORZA": "/images/FORZA.png",
+  "X-MAX": "/images/X-MAX.png",
+  "PCX": "/images/PCX.png",
+  "N-MAX": "/images/N-MAX.png",
 };
 
 const CategoryList = () => {
@@ -15,7 +21,6 @@ const CategoryList = () => {
     const fetchCategories = async () => {
       const categoriesData = await getCategories();
       const categories = categoriesData.map(item => item.category);
-      console.log("🛠 변환된 카테고리 데이터:", categories);
       setCategories(categories);
     };
     
@@ -23,13 +28,7 @@ const CategoryList = () => {
   }, []);
 
   const handleSelectCategory = (category) => {
-    console.log(`🛠 선택한 카테고리: ${category}`);
-    navigate(`/products?category=${encodeURIComponent(category)}`); // ✅ 카테고리 선택 시 이동
-  };
-
-  const getCategoryImageUrl = (categoryName) => {
-    const imageName = categoryImageMap[categoryName] || encodeURIComponent(categoryName);
-    return `${process.env.REACT_APP_SUPABASE_URL}/storage/v1/object/public/category-images/${imageName}.png`;
+    navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
   return (
@@ -41,9 +40,9 @@ const CategoryList = () => {
             onClick={() => handleSelectCategory(category)}
             className="border p-4 rounded-xl shadow flex flex-col justify-between w-full aspect-square bg-white"
           >
-            <h3 className="mb-2 text-lg md:text-2xl lg:text-3xl font-semibold text-start text-gray-950">{category}</h3>
+            <h3 className="mb-3 text-lg md:text-lg lg:text-2xl font-semibold text-start text-gray-950">{category}</h3>
             <img
-              src={getCategoryImageUrl(category)}
+              src={categoryImageMap[category]}
               alt={category}
               className="w-full object-contain"
             />
