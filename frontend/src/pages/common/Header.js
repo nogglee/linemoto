@@ -33,15 +33,15 @@ const Header = () => {
               </Link>
             )
           ) : location.pathname === "/login" ? (
-            <Link to="/signup" className="px-4 py-2 bg-green-500 text-white rounded">
+            <Link to="/signup" className="px-4 py-2 border border-gray-900 text-gray-900 rounded-2xl hover:bg-gray-900 hover:text-white">
               회원가입
             </Link>
           ) : location.pathname === "/signup" ? (
-            <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
+            <Link to="/login" className="px-4 py-2 bg-gray-900 text-white rounded-2xl">
               로그인
             </Link>
           ) : (
-            <Link to="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
+            <Link to="/login" className="px-4 py-2 bg-gray-900 text-white rounded-2xl">
               로그인
             </Link>
           )}
