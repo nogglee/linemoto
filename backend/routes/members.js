@@ -151,6 +151,11 @@ router.patch("/:id/pay-arrears", async (req, res) => {
 
 router.get("/mypage/:account_id", async (req, res) => {
   const { account_id } = req.params;
+  console.log("📌 전달된 account_id:", account_id); // 🔥 디버깅 로그 추가
+
+  if (!account_id) {
+    return res.status(400).json({ message: "account_id가 제공되지 않았습니다." });
+  }
 
   try {
     // 🔹 1️⃣ account_id를 이용하여 해당 회원 정보 가져오기
@@ -166,11 +171,12 @@ router.get("/mypage/:account_id", async (req, res) => {
     }
 
     const member = memberResult.rows[0];
+    console.log("📌 조회된 회원 정보:", member);
 
     // 🔹 2️⃣ 해당 회원의 결제 내역 가져오기 (earned_points & adjustment 추가!)
     const transactionsResult = await pool.query(
       `SELECT s.id, s.final_amount, s.discount, s.payment_method, s.created_at,
-              ROUND(s.final_amount * 0.05) AS earned_points, s.admin_id, s.admin_name, 
+              ROUND(s.final_amount * 0.05) AS earned_points,s.store_id, st.name AS store_name,
               s.adjustment, s.adjustment_reason,  
               json_agg(json_build_object(
                 'product_id', sd.product_id,
@@ -181,8 +187,9 @@ router.get("/mypage/:account_id", async (req, res) => {
        FROM transactions.sales s
        JOIN transactions.sales_details sd ON s.id = sd.sale_id
        JOIN shops.products p ON sd.product_id = p.id
-       WHERE s.customer_id = $1  -- 🔥 여기서 member.account_id 사용!
-       GROUP BY s.id
+       JOIN shops.stores st ON s.store_id = st.id
+       WHERE s.customer_id = $1 
+       GROUP BY s.id, s.store_id, st.name
        ORDER BY s.created_at DESC`,
       [member.account_id] // ✅ member.id → member.account_id로 변경
     );

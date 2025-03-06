@@ -29,11 +29,13 @@ const authRouter = require("./routes/auth");
 const productsRouter = require("./routes/products");
 const memberRouter = require("./routes/members");
 const transactionRouter = require("./routes/transactions");
+const adminRouter = require("./routes/admin");
 
 app.use("/auth", authRouter);  
 app.use("/products", productsRouter);  
 app.use("/members", memberRouter);
 app.use("/transactions", transactionRouter);
+app.use("/admins", adminRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
