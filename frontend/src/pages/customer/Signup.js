@@ -75,79 +75,79 @@ const SignupForm = () => {
 };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 space-y-4 bg-white shadow-lg rounded-xl">
-      <h2 className="text-xl font-bold text-center">회원가입</h2>
-
-      {/* 이름 */}
-      <div>
-        <label className="block font-bold text-gray-700">이름</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="실명을 입력해 주세요"
-          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
-        />
-      </div>
-
-      {/* 휴대폰번호 */}
-      <div>
-        <label className="block font-bold text-gray-700">휴대폰번호</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={handlePhoneChange}
-          placeholder="숫자만 입력해 주세요"
-          pattern="\d*"
-          className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
-          maxLength="11"
-        />
-      </div>
-
-      {/* 생년월일 */}
-      <div>
-        <label className="block font-bold text-gray-700">생년월일</label>
-        <div className="flex space-x-2">
-          <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border rounded w-1/3">
-            <option value="">년</option>
-            {Array.from({ length: 75 }, (_, i) => 2010 - i).map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border rounded w-1/3">
-            <option value="">월</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <option key={m} value={m.toString().padStart(2, "0")}>{m}</option>
-            ))}
-          </select>
-          <select value={day} onChange={(e) => setDay(e.target.value)} className="p-2 border rounded w-1/3">
-            <option value="">일</option>
-            {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-              <option key={d} value={d.toString().padStart(2, "0")}>{d}</option>
-            ))}
-          </select>
+    <form onSubmit={handleSubmit} className="flex w-full mt-4 px-4 md:px-[160px] lg:px-[200px] min-h-screen justify-center">
+      <div className="mt-20 w-full max-w-md">
+        <h2 className="text-4xl font-semibold text-center mb-10">회원가입</h2>
+        <div className="flex flex-col gap-1 w-full mb-4">
+          <label className="block font-500 text-sm text-gray-900">이름</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="실명을 입력해 주세요"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+          />
         </div>
-      </div>
 
-      <label className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={(e) => setIsChecked(e.target.checked)}
-          className="w-5 h-5 accent-blue-500"
-        />
-        <span className="text-sm text-gray-700">개인정보 수집 및 이용에 동의합니다.</span>
-      </label>
+        {/* 휴대폰번호 */}
+        <div>
+          <label className="block font-bold text-gray-700">휴대폰번호</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={handlePhoneChange}
+            placeholder="숫자만 입력해 주세요"
+            pattern="\d*"
+            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+            maxLength="11"
+          />
+        </div>
 
-      {/* 회원가입 버튼 */}
-      <button
-  className={`px-4 py-2 rounded-md text-white ${
-    isChecked && !isSubmitting ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-300 cursor-not-allowed"
-  }`}
-  disabled={!isChecked || isSubmitting} // ✅ isSubmitting이 true면 비활성화
->
-  {isSubmitting ? "처리 중..." : "회원가입"}
-</button>
+        {/* 생년월일 */}
+        <div>
+          <label className="block font-bold text-gray-700">생년월일</label>
+          <div className="flex space-x-2">
+            <select value={year} onChange={(e) => setYear(e.target.value)} className="p-2 border rounded w-1/3">
+              <option value="">년</option>
+              {Array.from({ length: 75 }, (_, i) => 2010 - i).map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <select value={month} onChange={(e) => setMonth(e.target.value)} className="p-2 border rounded w-1/3">
+              <option value="">월</option>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                <option key={m} value={m.toString().padStart(2, "0")}>{m}</option>
+              ))}
+            </select>
+            <select value={day} onChange={(e) => setDay(e.target.value)} className="p-2 border rounded w-1/3">
+              <option value="">일</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={d.toString().padStart(2, "0")}>{d}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={(e) => setIsChecked(e.target.checked)}
+            className="w-5 h-5 accent-blue-500"
+          />
+          <span className="text-sm text-gray-700">개인정보 수집 및 이용에 동의합니다.</span>
+        </label>
+
+        {/* 회원가입 버튼 */}
+        <button
+    className={`px-4 py-2 rounded-md text-white ${
+      isChecked && !isSubmitting ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-300 cursor-not-allowed"
+    }`}
+    disabled={!isChecked || isSubmitting} // ✅ isSubmitting이 true면 비활성화
+  >
+    {isSubmitting ? "처리 중..." : "회원가입"}
+  </button>
+  </div>
     </form>
   );
 };
