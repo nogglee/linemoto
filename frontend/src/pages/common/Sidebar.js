@@ -46,7 +46,7 @@ function Sidebar({ user, setUser }) {
   };
 
   return (
-    <div className="bg-gray-100 py-10 px-5 font-body flex flex-col gap-5 ">
+    <div className="bg-gray-100 py-10 px-5 font-body flex flex-col gap-5 min-h-screen">
       <div className="py-3 px-2.5 flex justify-between">
         <p className="font-700 text-xl pt-[2px]">라인모토</p>
         <button className="logout-btn" onClick={handleLogout}><LogoutIcon /></button>

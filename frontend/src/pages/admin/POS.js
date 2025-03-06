@@ -89,9 +89,9 @@ const POS = (user) => {
   };
 
   return (
-    <div className="flex h-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] font-body overflow-hidden">
+    <div className="flex h-full rounded-3xl bg-gray-50 border-gray-200 border-[1px] font-body overflow-auto">
       <div className="flex flex-col w-full p-8">
-        <div className="flex border-b border-gray-300 mb-4 overflow-scroll">
+        <div className="flex border-b border-gray-300 mb-4 overflow-scroll scrollbar-hide">
           {categories.map((category) => (
             <button
               key={category}

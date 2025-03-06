@@ -12,6 +12,7 @@ const categoryImageMap = {
   "PCX": "/images/PCX.png",
   "N-MAX": "/images/N-MAX.png",
 };
+const DEFAULT = "/images/DEFAULT.png";
 
 const CategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -42,9 +43,13 @@ const CategoryList = () => {
           >
             <h3 className="mb-3 text-lg md:text-lg lg:text-2xl font-semibold text-start text-gray-950">{category}</h3>
             <img
-              src={categoryImageMap[category]}
+              src={categoryImageMap[category] || DEFAULT }
               alt={category}
               className="w-full object-contain"
+              onError={(e) => {
+                e.target.src = DEFAULT;
+              }
+            }
             />
           </button>
         ))}

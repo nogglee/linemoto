@@ -4,10 +4,10 @@ import Sidebar from "../common/Sidebar";
 
 const AdminLayout = ({ user, setUser, stock, setStock }) => {
   return (
-    <div className="flex h-full">
-      <Sidebar user={user} setUser={setUser} /> {/* ✅ setUser 전달 */}
-      <div className="flex-1 p-6  h-full">
-        <Outlet context={{ user, setUser, stock, setStock }} /> {/* ✅ Nested Routes 적용 */}
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar user={user} setUser={setUser}/>
+      <div className="flex-1 p-6  h-full overflow-auto">
+        <Outlet context={{ user, setUser, stock, setStock }} />
       </div>
     </div>
   );
