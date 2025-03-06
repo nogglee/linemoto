@@ -31,7 +31,6 @@ router.post("/signup", async (req, res) => {
   try {
     await client.query("BEGIN"); // 트랜잭션 시작
     console.log("📌 회원가입 요청 데이터:", req.body);
-    console.log(response.timeStamp);
 
     // 1️⃣ 중복 전화번호 체크
     const checkUser = await client.query(
