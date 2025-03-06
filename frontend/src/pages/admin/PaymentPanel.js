@@ -162,7 +162,7 @@ const PaymentPanel = ({
   };
 
   return (
-    <div className="w-[400px] min-w-[260px] bg-white border-l border-gray-200 overflow-auto">
+    <div className="w-[400px] min-w-[260px] bg-white border-l border-gray-200 overflow-auto payment-panel">
       <div className="flex flex-col justify-between h-full">
       <div className={`flex items-center border-b border-gray-100 p-5 font-500 ${ cartItems.length > 1 ? "justify-between" : "justify-end" }`}>
         {cartItems.length > 1 && (

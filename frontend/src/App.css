@@ -18,7 +18,8 @@ body,
 }
 
 .sidebar,
-.menubar {
+.menubar,
+.payment-panel {
   overflow-y: auto;
   scrollbar-width: none;
   /* Firefox에서 숨김 */
@@ -26,7 +27,8 @@ body,
 }
 
 .sidebar,
-.menubar::-webkit-scrollbar {
+.menubar,
+.payment-panel::-webkit-scrollbar {
   display: none;
 }
 
