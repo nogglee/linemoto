@@ -145,8 +145,8 @@ router.get("/sales/:admin_id", async (req, res) => {
       ORDER BY s.created_at DESC;`,
       [admin_id]
     );
-    console.log("📌 received earned_points:", result.rows.map(row => row.earned_points));
-    console.log("📌 서버에서 반환한 sales 데이터:", result.rows); // ✅ 이 로그가 찍혀야 함
+    // console.log("📌 received earned_points:", result.rows.map(row => row.earned_points));
+    // console.log("📌 서버에서 반환한 sales 데이터:", result.rows); // ✅ 이 로그가 찍혀야 함
 
 
     res.json(result.rows);
