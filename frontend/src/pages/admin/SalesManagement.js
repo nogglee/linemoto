@@ -21,7 +21,7 @@ const SalesManagement = ({ admin }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    console.log("📌 현재 sales 상태:", sales);
+    // console.log("📌 현재 sales 상태:", sales);
   }, [sales]);
 
   useEffect(() => {
@@ -32,8 +32,6 @@ const SalesManagement = ({ admin }) => {
       return;
     }
 
-    console.log("📌 fetchAdminSales 호출 - admin_id:", admin?.id); // ✅ admin.id 값 확인
-
     const loadSalesData = async () => {
       setLoading(true);
       setError(null); // ✅ 기존 오류 초기화
@@ -43,9 +41,8 @@ const SalesManagement = ({ admin }) => {
           throw new Error("관리자 ID가 없습니다.");
         }
 
-        console.log("🛠 API 요청 시작: GET /transactions/sales/" + admin.id);
         const data = await fetchAdminSales(admin.id);
-        console.log("✅ API 응답 수신:", data);
+        // console.log("✅ API 응답 수신:", data);
 
         if (!data || data.length === 0) {
           console.warn("⚠️ 불러온 매출 데이터가 없습니다.");
