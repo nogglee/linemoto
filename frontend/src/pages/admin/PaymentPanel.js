@@ -377,7 +377,7 @@ const PaymentPanel = ({
         {/* 포인트 사용 (보유 포인트 5만 이상일 때만 활성화) */}
         {selectedMember && (
         <div className={`flex justify-between rounded-xl px-3 py-2.5 mb-1.5 ${
-          !selectedMember || selectedMember.points < 50000  
+          !selectedMember || selectedMember.points < 30000  
             ? "bg-gray-100 text-gray-200 cursor-not-allowed"
             : "border border-gray-900 text-gray-950"
           }`}
